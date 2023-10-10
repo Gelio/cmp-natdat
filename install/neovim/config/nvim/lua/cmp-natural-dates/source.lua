@@ -10,15 +10,34 @@ end
 
 local prefix = "@"
 
+local natdat = require("cmp-natural-dates.parsers")
+
 ---@param params cmp.SourceCompletionApiParams
 ---@param callback fun(response: lsp.CompletionResponse|nil)
 function source:complete(params, callback)
 	local input = string.sub(params.context.cursor_before_line, params.offset)
 	vim.print({ input })
+
 	if not vim.startswith(input, prefix) then
 		callback({ isIncomplete = true })
 	end
+
 	local input_without_prefix = string.sub(input, string.len(prefix) + 1)
+
+	local result = natdat.date_time_pcomb({
+		text = input_without_prefix,
+		offset = 1,
+	})
+	vim.print({ result = result, text = input_without_prefix })
+	if result:is_ok() then
+		callback({
+			isIncomplete = true,
+			items = vim.tbl_map(function(suggestion)
+				return { label = prefix .. suggestion }
+			end, result.value.output.suggestions),
+		})
+		return
+	end
 
 	callback({
 		items = {
