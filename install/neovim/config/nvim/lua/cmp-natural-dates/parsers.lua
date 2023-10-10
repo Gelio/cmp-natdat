@@ -127,9 +127,109 @@ function M.parse_time(input)
 	end
 end
 
+local pcomb = require("cmp-natural-dates.pcomb")
+local Result = require("cmp-natural-dates.tluser")
+
+---@class natdat.Match<T>: { value: T, suggestions: string[] }
+local Match = {}
+
+---@param value string
+---@return natdat.Match<string>
+function Match.from_string(value)
+	---@type natdat.Match<string>
+	local match = {
+		value = value,
+		suggestions = { value },
+	}
+	return match
+end
+
+M.hour_pcomb = pcomb.map_res(pcomb.integer, function(integer)
+	if integer >= 24 then
+		return Result.err("Hour " .. integer .. " is too large")
+	end
+
+	---@type natdat.Match<integer>
+	local match = {
+		value = integer,
+		suggestions = { tostring(integer) },
+	}
+	return Result.ok(match)
+end)
+
+M.minutes_pcomb = pcomb.map_res(pcomb.integer, function(integer)
+	if integer >= 59 then
+		return Result.err("Minutes " .. integer .. " is too large")
+	end
+
+	---@type natdat.Match<integer>
+	local match = {
+		value = integer,
+		suggestions = { string.format("%02d", integer) },
+	}
+	return Result.ok(match)
+end)
+
+-- integer
+-- (:integer) (optional)
+-- optional whitespace
+-- (am|pm) (optional)
+M.parse_time_pcomb = pcomb.map_res(
+	pcomb.sequence({
+		M.hour_pcomb,
+		pcomb.opt_with_default(
+			pcomb.map(
+				pcomb.sequence({
+					pcomb.tag(":"),
+					M.minutes_pcomb,
+				}),
+				function(sequence_match)
+					---@type natdat.Match<integer>
+					local minutes_match = sequence_match[2]
+					return minutes_match
+				end
+			),
+			---@type natdat.Match<integer>
+			{
+				value = 0,
+				suggestions = { "00" },
+			}
+		),
+		pcomb.regexp("%s*"),
+		pcomb.opt(pcomb.alt({
+			-- TODO: improve matching am/pm:
+			-- * add suggestions
+			-- * match only "a" or "p"
+			pcomb.tag("am"),
+			pcomb.tag("pm"),
+		})),
+	}),
+	function(sequence_match)
+		---@type natdat.Match<integer>
+		local hour_match = sequence_match[1]
+		---@type natdat.Match<integer>
+		local minutes_match = sequence_match[2]
+		local am_pm_match = sequence_match[4]
+
+		if not pcomb.is_NIL(am_pm_match) then
+			-- TODO: adjust hour based on am/pm
+		end
+
+		---@type natdat.Match<{ hour: integer; minutes: integer; }>
+		local match = {
+			value = {
+				hour = hour_match.value,
+				minutes = minutes_match.value,
+			},
+			suggestions = { hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] },
+		}
+		return Result.ok(match)
+	end
+)
+
 ---@param hour number
 ---@return number
-local function get_pm_hour(hour)
+local function to_pm_hour(hour)
 	if hour == 12 then
 		return 12
 	else
@@ -139,7 +239,7 @@ end
 
 ---@param hour number
 ---@return number
-local function get_am_hour(hour)
+local function to_am_hour(hour)
 	if hour == 12 then
 		return 0
 	else

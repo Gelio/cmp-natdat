@@ -109,53 +109,385 @@ describe("get_suggested_months", function()
 	end)
 end)
 
-describe("parse_time", function()
+-- describe("parse_time", function()
+-- 	it("parses '14:00'", function()
+-- 		assert.are.same({
+-- 			hours = 14,
+-- 			minutes = 0,
+-- 		}, parsers.parse_time("14:00"))
+-- 	end)
+--
+-- 	it("parses '14'", function()
+-- 		assert.are.same({
+-- 			hours = 14,
+-- 			minutes = 0,
+-- 		}, parsers.parse_time("14"))
+-- 	end)
+--
+-- 	it("parses '14:'", function()
+-- 		assert.are.same({
+-- 			hours = 14,
+-- 			minutes = 0,
+-- 		}, parsers.parse_time("14:"))
+-- 	end)
+--
+-- 	it("parses '6:01'", function()
+-- 		assert.are.same({
+-- 			hours = 6,
+-- 			minutes = 1,
+-- 		}, parsers.parse_time("6:01"))
+-- 	end)
+--
+-- 	it("parses '6:01pm'", function()
+-- 		assert.are.same({
+-- 			hours = 18,
+-- 			minutes = 1,
+-- 		}, parsers.parse_time("6:01pm"))
+-- 	end)
+--
+-- 	it("parses '12:01pm'", function()
+-- 		assert.are.same({
+-- 			hours = 12,
+-- 			minutes = 1,
+-- 		}, parsers.parse_time("12:01pm"))
+-- 	end)
+--
+-- 	it("parses '12am'", function()
+-- 		assert.are.same({
+-- 			hours = 12,
+-- 			minutes = 0,
+-- 		}, parsers.parse_time("12am"))
+-- 	end)
+-- end)
+
+local Result = require("cmp-natural-dates.tluser")
+
+describe("hour_pcomb", function()
+	it("parses a valid hour", function()
+		local result = parsers.hour_pcomb({
+			text = "12",
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = "12",
+					offset = 3,
+				},
+				output = {
+					value = 12,
+					suggestions = { "12" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("returns an error if the number is greater than 23", function()
+		local result = parsers.hour_pcomb({
+			text = "24",
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+
+	it("returns an error if the input is not a number", function()
+		local result = parsers.hour_pcomb({
+			text = "am",
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
+
+describe("minute_pcomb", function()
+	it("parses valid minutes", function()
+		local result = parsers.minutes_pcomb({
+			text = "32",
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = "32",
+					offset = 3,
+				},
+				output = {
+					value = 32,
+					suggestions = { "32" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("pads suggested minutes to 2 places", function()
+		local result = parsers.minutes_pcomb({
+			text = "3",
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = "3",
+					offset = 2,
+				},
+				output = {
+					value = 3,
+					suggestions = { "03" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("returns an error if the number is greater than 59", function()
+		local result = parsers.minutes_pcomb({
+			text = "60",
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+
+	it("returns an error if the input is not a number", function()
+		local result = parsers.minutes_pcomb({
+			text = "am",
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
+
+describe("parse_time_pcomb", function()
 	it("parses '14:00'", function()
-		assert.are.same({
-			hours = 14,
-			minutes = 0,
-		}, parsers.parse_time("14:00"))
+		local text = "14:00"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 14,
+						minutes = 0,
+					},
+					suggestions = { "14:00" },
+				},
+			}),
+			result
+		)
 	end)
 
 	it("parses '14'", function()
-		assert.are.same({
-			hours = 14,
-			minutes = 0,
-		}, parsers.parse_time("14"))
+		local text = "14"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 14,
+						minutes = 0,
+					},
+					suggestions = { "14:00" },
+				},
+			}),
+			result
+		)
 	end)
 
 	it("parses '14:'", function()
-		assert.are.same({
-			hours = 14,
-			minutes = 0,
-		}, parsers.parse_time("14:"))
+		local text = "14:"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = {
+					value = {
+						hour = 14,
+						minutes = 0,
+					},
+					suggestions = { "14:00" },
+				},
+			}),
+			result
+		)
 	end)
 
 	it("parses '6:01'", function()
-		assert.are.same({
-			hours = 6,
-			minutes = 1,
-		}, parsers.parse_time("6:01"))
+		local text = "6:01"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 6,
+						minutes = 1,
+					},
+					suggestions = { "6:01" },
+				},
+			}),
+			result
+		)
 	end)
 
 	it("parses '6:01pm'", function()
-		assert.are.same({
-			hours = 18,
-			minutes = 1,
-		}, parsers.parse_time("6:01pm"))
+		local text = "6:01pm"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 18,
+						minutes = 1,
+					},
+					suggestions = { "6:01pm" },
+				},
+			}),
+			result
+		)
 	end)
 
 	it("parses '12:01pm'", function()
-		assert.are.same({
-			hours = 12,
-			minutes = 1,
-		}, parsers.parse_time("12:01pm"))
+		local text = "12:01pm"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 12,
+						minutes = 1,
+					},
+					suggestions = { "12:01pm" },
+				},
+			}),
+			result
+		)
 	end)
 
 	it("parses '12am'", function()
-		assert.are.same({
-			hours = 12,
-			minutes = 0,
-		}, parsers.parse_time("12am"))
+		local text = "12am"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 0,
+						minutes = 0,
+					},
+					suggestions = { "12am" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("parses '12a'", function()
+		local text = "12a"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 0,
+						minutes = 0,
+					},
+					suggestions = { "12am" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("parses '12:1p'", function()
+		local text = "12:1p"
+		local result = parsers.parse_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 12,
+						minutes = 1,
+					},
+					suggestions = { "12:01pm" },
+				},
+			}),
+			result
+		)
 	end)
 end)
