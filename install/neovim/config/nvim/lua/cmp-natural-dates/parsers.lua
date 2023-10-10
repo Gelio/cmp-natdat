@@ -171,21 +171,10 @@ M.minutes_pcomb = pcomb.map_res(pcomb.integer, function(integer)
 end)
 
 M.am_pm_pcomb = pcomb.map(
-	pcomb.flat_map(
-		pcomb.peek(pcomb.alt({
-			pcomb.tag("a"),
-			pcomb.tag("p"),
-		})),
-		function(letter)
-			assert(letter == "a" or letter == "p", "Unexpected letter " .. letter .. ". It should be 'a' or 'p'")
-
-			-- TODO: try this without the entier peek+flat_map magic. This should be enough
-			return pcomb.sequence({
-				pcomb.tag(letter),
-				pcomb.opt(pcomb.tag("m")),
-			})
-		end
-	),
+	pcomb.sequence({
+		pcomb.alt({ pcomb.tag("a"), pcomb.tag("p") }),
+		pcomb.opt(pcomb.tag("m")),
+	}),
 	---@param letters string[]
 	---@return natdat.Match<"am" | "a" | "pm" | "p">
 	function(letters)
