@@ -109,57 +109,6 @@ describe("get_suggested_months", function()
 	end)
 end)
 
--- describe("parse_time", function()
--- 	it("parses '14:00'", function()
--- 		assert.are.same({
--- 			hours = 14,
--- 			minutes = 0,
--- 		}, parsers.parse_time("14:00"))
--- 	end)
---
--- 	it("parses '14'", function()
--- 		assert.are.same({
--- 			hours = 14,
--- 			minutes = 0,
--- 		}, parsers.parse_time("14"))
--- 	end)
---
--- 	it("parses '14:'", function()
--- 		assert.are.same({
--- 			hours = 14,
--- 			minutes = 0,
--- 		}, parsers.parse_time("14:"))
--- 	end)
---
--- 	it("parses '6:01'", function()
--- 		assert.are.same({
--- 			hours = 6,
--- 			minutes = 1,
--- 		}, parsers.parse_time("6:01"))
--- 	end)
---
--- 	it("parses '6:01pm'", function()
--- 		assert.are.same({
--- 			hours = 18,
--- 			minutes = 1,
--- 		}, parsers.parse_time("6:01pm"))
--- 	end)
---
--- 	it("parses '12:01pm'", function()
--- 		assert.are.same({
--- 			hours = 12,
--- 			minutes = 1,
--- 		}, parsers.parse_time("12:01pm"))
--- 	end)
---
--- 	it("parses '12am'", function()
--- 		assert.are.same({
--- 			hours = 12,
--- 			minutes = 0,
--- 		}, parsers.parse_time("12am"))
--- 	end)
--- end)
-
 local Result = require("cmp-natural-dates.tluser")
 
 describe("hour_pcomb", function()
