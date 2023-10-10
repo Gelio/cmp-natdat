@@ -57,6 +57,32 @@ function Match.from_string(value)
 	return match
 end
 
+local pcomb_word = pcomb.regexp("%a+")
+
+M.month_pcomb = pcomb.map_res(
+	pcomb_word,
+	---@param word string
+	function(word)
+		local matching_months = M.get_suggested_months(word)
+
+		if #matching_months == 0 then
+			return Result.err("No month match " .. word)
+		end
+
+		---@type natdat.Match<{ word: string, matched_month: SuggestedMonth | nil }>
+		local match = {
+			value = {
+				word = word,
+				matched_month = #matching_months == 1 and matching_months[1] or nil,
+			},
+			suggestions = vim.tbl_map(function(suggested_month)
+				return suggested_month.name
+			end, matching_months),
+		}
+		return Result.ok(match)
+	end
+)
+
 M.hour_pcomb = pcomb.map_res(pcomb.integer, function(integer)
 	if integer >= 24 then
 		return Result.err("Hour " .. integer .. " is too large")

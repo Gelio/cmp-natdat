@@ -111,6 +111,89 @@ end)
 
 local Result = require("cmp-natural-dates.tluser")
 
+describe("month_pcomb", function()
+	it("matches 'January'", function()
+		local text = "January"
+		local result = parsers.month_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						word = text,
+						matched_month = {
+							name = "January",
+							value = 1,
+						},
+					},
+					suggestions = { "January" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Jan'", function()
+		local text = "Jan"
+		local result = parsers.month_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						word = text,
+						matched_month = {
+							name = "January",
+							value = 1,
+						},
+					},
+					suggestions = { "January" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'J and some more'", function()
+		local text = "J and some more"
+		local result = parsers.month_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 2,
+				},
+				output = {
+					value = {
+						word = "J",
+						matched_month = nil,
+					},
+					suggestions = { "January", "June", "July" },
+				},
+			}),
+			result
+		)
+	end)
+end)
+
 describe("hour_pcomb", function()
 	it("parses a valid hour", function()
 		local result = parsers.hour_pcomb({
