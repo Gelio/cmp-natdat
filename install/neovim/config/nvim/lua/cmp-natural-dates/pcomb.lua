@@ -42,23 +42,44 @@ function M.tag(tag)
 	end
 end
 
+---@alias pcomb.NIL {}
+
+---An artificial replacement for `nil` to allow storing `NIL` in tables.
+---Useful in `sequence`
+---@type pcomb.NIL
+M.NIL = {
+	"pcomb.NIL",
+}
+
+function M.is_NIL(value)
+	return type(value) == "table" and value[1] == "pcomb.NIL"
+end
+
 ---@generic Output
 ---@param parser pcomb.Parser<Output>
----@return pcomb.Parser<Output | nil>
-function M.opt(parser)
+---@param default_value Output
+---@return pcomb.Parser<Output>
+function M.opt_with_default(parser, default_value)
 	return function(input)
 		local result = parser(input)
 		if result:is_err() then
-			---@type pcomb.Result<nil>
+			---@type pcomb.Result<pcomb.NIL>
 			local pcomb_res = {
 				input = input,
-				output = nil,
+				output = default_value,
 			}
 			return Result.ok(pcomb_res)
 		else
 			return result
 		end
 	end
+end
+
+---@generic Output
+---@param parser pcomb.Parser<Output>
+---@return pcomb.Parser<Output | pcomb.NIL>
+function M.opt(parser)
+	return M.opt_with_default(parser, M.NIL)
 end
 
 ---@generic Output

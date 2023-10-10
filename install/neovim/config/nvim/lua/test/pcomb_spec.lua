@@ -53,7 +53,7 @@ describe("opt", function()
 		)
 	end)
 
-	it("returns nil when the inner parser was not successful", function()
+	it("returns NIL when the inner parser was not successful", function()
 		local parser = pcomb.opt(pcomb.tag("you!"))
 		local text = "hey! you!"
 		local result = parser({
@@ -67,7 +67,7 @@ describe("opt", function()
 					text = text,
 					offset = 1,
 				},
-				output = nil,
+				output = pcomb.NIL,
 			}),
 			result
 		)
