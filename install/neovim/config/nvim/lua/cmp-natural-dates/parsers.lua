@@ -127,10 +127,6 @@ local function to_am_hour(hour)
 	end
 end
 
--- integer
--- (:integer) (optional)
--- optional whitespace
--- (am|pm) (optional)
 M.parse_time_pcomb = pcomb.map_res(
 	pcomb.sequence({
 		M.hour_pcomb,
