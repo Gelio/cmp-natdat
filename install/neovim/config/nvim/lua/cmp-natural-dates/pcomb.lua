@@ -227,4 +227,32 @@ function M.alt(parsers)
 	end
 end
 
+---@param parsers pcomb.Parser<unknown>[]
+---@return pcomb.Parser<unknown[]>
+function M.sequence(parsers)
+	return function(input)
+		---@type unknown[]
+		local results = {}
+
+		for _, parser in ipairs(parsers) do
+			local result = parser(input)
+			if result:is_ok() then
+				---@type pcomb.Result<unknown>
+				local pcomb_res = result.value
+				input = pcomb_res.input
+				table.insert(results, pcomb_res.output)
+			else
+				return Result.err("Could not match a sequence of parsers")
+			end
+		end
+
+		---@type pcomb.Result<unknown[]>
+		local pcomb_res = {
+			input = input,
+			output = results,
+		}
+		return Result.ok(pcomb_res)
+	end
+end
+
 return M
