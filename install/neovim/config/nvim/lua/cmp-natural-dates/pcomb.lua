@@ -255,4 +255,46 @@ function M.sequence(parsers)
 	end
 end
 
+---@generic Output
+---@param parser pcomb.Parser<Output>
+---@return pcomb.Parser<Output>
+function M.peek(parser)
+	---@param input pcomb.Input
+	return function(input)
+		local result = parser(input)
+		if result:is_err() then
+			return result
+		end
+
+		---@type pcomb.Result<Output>
+		local pcomb_res = {
+			-- NOTE: do not consume the peeked part
+			input = input,
+			output = result.value.output,
+		}
+		return Result.ok(pcomb_res)
+	end
+end
+
+---@generic InnerOutput
+---@generic OuterOutput
+---@param parser pcomb.Parser<InnerOutput>
+---@param get_next_parser function(inner_output: InnerOutput): pcomb.Parser<OuterOutput>
+---@return pcomb.Parser<OuterOutput>
+function M.flat_map(parser, get_next_parser)
+	---@param input pcomb.Input
+	return function(input)
+		local inner_result = parser(input)
+		if inner_result:is_err() then
+			return inner_result
+		end
+
+		---@type pcomb.Result<InnerOutput>
+		local inner_pcomb_result = inner_result.value
+
+		local next_parser = get_next_parser(inner_pcomb_result.output)
+		return next_parser(inner_pcomb_result.input)
+	end
+end
+
 return M

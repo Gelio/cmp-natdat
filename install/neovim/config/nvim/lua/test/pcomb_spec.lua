@@ -457,3 +457,82 @@ describe("sequence", function()
 		assert.is_true(result:is_err())
 	end)
 end)
+
+describe("peek", function()
+	it("parses but does not consume the parsed part in the output", function()
+		local parser = pcomb.peek(pcomb.tag("hey"))
+		local text = "hey you"
+		local result = parser({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 1,
+				},
+				output = "hey",
+			}),
+			result
+		)
+	end)
+
+	it("propagates errors", function()
+		local parser = pcomb.peek(pcomb.tag("hey"))
+		local text = "nope"
+		local result = parser({
+			text = text,
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
+
+describe("flat_map", function()
+	local am_pm_parser = pcomb.flat_map(
+		pcomb.peek(pcomb.alt({
+			pcomb.tag("a"),
+			pcomb.tag("p"),
+		})),
+		function(letter)
+			assert(letter == "a" or letter == "p", "Unexpected letter " .. letter .. ". It should be 'a' or 'p'")
+
+			return pcomb.sequence({
+				pcomb.tag(letter),
+				pcomb.opt(pcomb.tag("m")),
+			})
+		end
+	)
+
+	it("gets the next parser based on the output of the first parser", function()
+		local text = "am"
+		local result = am_pm_parser({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = { "a", "m" },
+			}),
+			result
+		)
+	end)
+
+	it("propagates errors", function()
+		local text = "hello"
+		local result = am_pm_parser({
+			text = text,
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
