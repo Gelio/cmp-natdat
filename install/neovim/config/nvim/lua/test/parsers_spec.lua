@@ -257,6 +257,58 @@ describe("date_pcomb", function()
 		)
 	end)
 
+	it("matches 'Oct 10 14:' without parsing the '14:' as part of year", function()
+		local text = "Oct 10 14:"
+		local result = parsers.date_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 7,
+				},
+				output = {
+					value = {
+						month = 10,
+						year = nil,
+						day_of_month = 10,
+					},
+					suggestions = { "October 10" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Oct 10 14p' without parsing the '14:' as part of year", function()
+		local text = "Oct 10 14p"
+		local result = parsers.date_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 7,
+				},
+				output = {
+					value = {
+						month = 10,
+						year = nil,
+						day_of_month = 10,
+					},
+					suggestions = { "October 10" },
+				},
+			}),
+			result
+		)
+	end)
+
 	it("matches 'J 10'", function()
 		local text = "J 10"
 		local result = parsers.date_pcomb({

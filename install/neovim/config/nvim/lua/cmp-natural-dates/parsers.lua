@@ -118,7 +118,17 @@ M.date_pcomb = pcomb.map_res(
 		M.month_pcomb,
 		pcomb.opt(pcomb.sequence({
 			pcomb.preceded(pcomb.multispace0, M.day_of_month_pcomb),
-			pcomb.opt(pcomb.preceded(pcomb.multispace1, M.year_pcomb)),
+			pcomb.opt(pcomb.preceded(
+				pcomb.multispace1,
+				pcomb.terminated(
+					M.year_pcomb,
+
+					pcomb.peek(pcomb.alt({
+						pcomb.end_of_input,
+						pcomb.multispace1,
+					}))
+				)
+			)),
 		})),
 	}),
 	function(results)
