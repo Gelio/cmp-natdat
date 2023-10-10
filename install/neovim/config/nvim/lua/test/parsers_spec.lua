@@ -480,7 +480,7 @@ describe("parse_time_pcomb", function()
 						hour = 0,
 						minutes = 0,
 					},
-					suggestions = { "12am" },
+					suggestions = { "12:00am" },
 				},
 			}),
 			result
@@ -505,7 +505,7 @@ describe("parse_time_pcomb", function()
 						hour = 0,
 						minutes = 0,
 					},
-					suggestions = { "12am" },
+					suggestions = { "12:00am" },
 				},
 			}),
 			result

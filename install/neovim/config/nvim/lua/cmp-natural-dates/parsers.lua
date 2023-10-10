@@ -194,6 +194,26 @@ M.am_pm_pcomb = pcomb.map(
 	end
 )
 
+---@param hour number
+---@return number
+local function to_pm_hour(hour)
+	if hour == 12 then
+		return 12
+	else
+		return hour + 12
+	end
+end
+
+---@param hour number
+---@return number
+local function to_am_hour(hour)
+	if hour == 12 then
+		return 0
+	else
+		return hour
+	end
+end
+
 -- integer
 -- (:integer) (optional)
 -- optional whitespace
@@ -220,24 +240,32 @@ M.parse_time_pcomb = pcomb.map_res(
 			}
 		),
 		pcomb.regexp("%s*"),
-		pcomb.opt(pcomb.alt({
-			-- TODO: improve matching am/pm:
-			-- * add suggestions
-			-- * match only "a" or "p"
-			pcomb.tag("am"),
-			pcomb.tag("pm"),
-		})),
+		pcomb.opt(M.am_pm_pcomb),
 	}),
 	function(sequence_match)
 		---@type natdat.Match<integer>
 		local hour_match = sequence_match[1]
 		---@type natdat.Match<integer>
 		local minutes_match = sequence_match[2]
-		---@type natdat.Match<"am" | "pm">
+		---@type natdat.Match<"am" | "pm"> | pcomb.NIL
 		local am_pm_match = sequence_match[4]
 
 		if not pcomb.is_NIL(am_pm_match) then
-			-- TODO: adjust hour based on am/pm
+			if hour_match.value > 12 then
+				return Result.err("Hour must be less than or equal 12 when using am/pm")
+			end
+
+			local hour_converter = am_pm_match.value:sub(1, 1) == "a" and to_am_hour or to_pm_hour
+
+			---@type natdat.Match<{ hour: integer; minutes: integer; }>
+			local match = {
+				value = {
+					hour = hour_converter(hour_match.value),
+					minutes = minutes_match.value,
+				},
+				suggestions = { hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] .. am_pm_match.suggestions[1] },
+			}
+			return Result.ok(match)
 		end
 
 		---@type natdat.Match<{ hour: integer; minutes: integer; }>
@@ -251,26 +279,6 @@ M.parse_time_pcomb = pcomb.map_res(
 		return Result.ok(match)
 	end
 )
-
----@param hour number
----@return number
-local function to_pm_hour(hour)
-	if hour == 12 then
-		return 12
-	else
-		return hour + 12
-	end
-end
-
----@param hour number
----@return number
-local function to_am_hour(hour)
-	if hour == 12 then
-		return 0
-	else
-		return hour
-	end
-end
 
 ---@param input_parts string[]
 function M.parse_month(input_parts)
