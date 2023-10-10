@@ -459,10 +459,10 @@ describe("am_pm_pcomb", function()
 	end)
 end)
 
-describe("parse_time_pcomb", function()
+describe("time_pcomb", function()
 	it("parses '14:00'", function()
 		local text = "14:00"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -487,7 +487,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '14'", function()
 		local text = "14"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -512,7 +512,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '14:'", function()
 		local text = "14:"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -537,7 +537,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '6:01'", function()
 		local text = "6:01"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -562,7 +562,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '6:01pm'", function()
 		local text = "6:01pm"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -587,7 +587,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '12:01pm'", function()
 		local text = "12:01pm"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -612,7 +612,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '12am'", function()
 		local text = "12am"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -637,7 +637,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '12a'", function()
 		local text = "12a"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})
@@ -662,7 +662,7 @@ describe("parse_time_pcomb", function()
 
 	it("parses '12:1p'", function()
 		local text = "12:1p"
-		local result = parsers.parse_time_pcomb({
+		local result = parsers.time_pcomb({
 			text = text,
 			offset = 1,
 		})

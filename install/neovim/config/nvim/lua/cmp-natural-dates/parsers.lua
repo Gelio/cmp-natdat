@@ -250,7 +250,7 @@ local function to_am_hour(hour)
 	end
 end
 
-M.parse_time_pcomb = pcomb.map_res(
+M.time_pcomb = pcomb.map_res(
 	pcomb.sequence({
 		M.hour_pcomb,
 		pcomb.opt_with_default(
