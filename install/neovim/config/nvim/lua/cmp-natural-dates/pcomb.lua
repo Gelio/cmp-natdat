@@ -317,4 +317,7 @@ function M.terminated(first, second)
 	end)
 end
 
+M.multispace0 = M.regexp("%s*")
+M.multispace1 = M.regexp("%s+")
+
 return M
