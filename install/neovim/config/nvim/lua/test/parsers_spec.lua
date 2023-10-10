@@ -192,6 +192,122 @@ describe("month_pcomb", function()
 			result
 		)
 	end)
+
+	it("returns an error when no month can be matched", function()
+		local text = "and some more"
+		local result = parsers.month_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
+
+describe("date_pcomb", function()
+	it("matches 'Oct 10 2023'", function()
+		local text = "Oct 10 2023"
+		local result = parsers.date_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						month = 10,
+						year = 2023,
+						day_of_month = 10,
+					},
+					suggestions = { "October 10 2023" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Oct 10'", function()
+		local text = "Oct 10"
+		local result = parsers.date_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						month = 10,
+						year = nil,
+						day_of_month = 10,
+					},
+					suggestions = { "October 10" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'J 10'", function()
+		local text = "J 10"
+		local result = parsers.date_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						month = nil,
+						year = nil,
+						day_of_month = 10,
+					},
+					suggestions = { "January 10", "June 10", "July 10" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Jan'", function()
+		local text = "Jan"
+		local result = parsers.date_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						month = 1,
+						year = nil,
+						day_of_month = nil,
+					},
+					suggestions = { "January" },
+				},
+			}),
+			result
+		)
+	end)
 end)
 
 describe("hour_pcomb", function()

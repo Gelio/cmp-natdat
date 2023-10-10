@@ -15,20 +15,20 @@ local months = {
 	"December",
 }
 
----@class SuggestedMonth
+---@class natdat.SuggestedMonth
 ---@field name string
----@field value number Month number, starting from 1
+---@field value integer Month number, starting from 1
 
 ---@param input string
----@return SuggestedMonth[]
+---@return natdat.SuggestedMonth[]
 function M.get_suggested_months(input)
 	local lowercase_input = string.lower(input)
 
-	---@type SuggestedMonth[]
+	---@type natdat.SuggestedMonth[]
 	local suggestions = {}
 	for index, month_name in ipairs(months) do
 		if vim.startswith(month_name:lower(), lowercase_input) then
-			---@type SuggestedMonth
+			---@type natdat.SuggestedMonth
 			local month = {
 				name = month_name,
 				value = index,
@@ -59,6 +59,10 @@ end
 
 local pcomb_word = pcomb.regexp("%a+")
 
+---@class natdat.MatchedMonth
+---@field word string
+---@field matched_month natdat.SuggestedMonth | nil
+
 M.month_pcomb = pcomb.map_res(
 	pcomb_word,
 	---@param word string
@@ -69,7 +73,7 @@ M.month_pcomb = pcomb.map_res(
 			return Result.err("No month match " .. word)
 		end
 
-		---@type natdat.Match<{ word: string, matched_month: SuggestedMonth | nil }>
+		---@type natdat.Match<natdat.MatchedMonth>
 		local match = {
 			value = {
 				word = word,
@@ -80,6 +84,99 @@ M.month_pcomb = pcomb.map_res(
 			end, matching_months),
 		}
 		return Result.ok(match)
+	end
+)
+
+M.day_of_month_pcomb = pcomb.map(pcomb.integer, function(day_of_month)
+	-- NOTE: checking if day_of_month is a valid month day happens in a consuming
+	-- parser
+
+	---@type natdat.Match<integer>
+	local match = {
+		value = day_of_month,
+		suggestions = { tostring(day_of_month) },
+	}
+	return match
+end)
+
+M.year_pcomb = pcomb.map(pcomb.integer, function(year)
+	---@type natdat.Match<integer>
+	local match = {
+		value = year,
+		suggestions = { tostring(year) },
+	}
+	return match
+end)
+
+---@class natdat.MatchedDate
+---@field day_of_month integer?
+---@field month integer?
+---@field year integer?
+
+M.date_pcomb = pcomb.map_res(
+	pcomb.sequence({
+		M.month_pcomb,
+		pcomb.opt(pcomb.sequence({
+			pcomb.preceded(pcomb.multispace0, M.day_of_month_pcomb),
+			pcomb.opt(pcomb.preceded(pcomb.multispace1, M.year_pcomb)),
+		})),
+	}),
+	function(results)
+		---@type natdat.Match<natdat.MatchedMonth>
+		local month_result = results[1]
+
+		if pcomb.is_NIL(results[2]) then
+			---@type natdat.Match<natdat.MatchedDate?>
+			local pcomb_res = {
+				value = month_result.value.matched_month and {
+					month = month_result.value.matched_month.value,
+					day_of_month = nil,
+					year = nil,
+				},
+				suggestions = month_result.suggestions,
+			}
+			return Result.ok(pcomb_res)
+		end
+
+		---@type natdat.Match<integer>
+		local day_of_month_result = results[2][1]
+		local day_of_month = day_of_month_result.value
+
+		-- TODO: verify if day_of_month is valid within the month
+
+		---@type natdat.Match<integer> | pcomb.NIL
+		local year_result = results[2][2]
+		if pcomb.is_NIL(year_result) then
+			---@type natdat.Match<natdat.MatchedDate>
+			local pcomb_res = {
+				value = {
+					month = month_result.value.matched_month and month_result.value.matched_month.value,
+					day_of_month = day_of_month,
+					year = nil,
+				},
+				suggestions = vim.tbl_map(function(month_name)
+					return month_name .. " " .. day_of_month
+				end, month_result.suggestions),
+			}
+
+			return Result.ok(pcomb_res)
+		end
+
+		local year = year_result.value
+
+		---@type natdat.Match<natdat.MatchedDate>
+		local pcomb_res = {
+			value = {
+				month = month_result.value.matched_month and month_result.value.matched_month.value,
+				day_of_month = day_of_month,
+				year = year,
+			},
+			suggestions = vim.tbl_map(function(month_name)
+				return month_name .. " " .. day_of_month_result.value .. " " .. year
+			end, month_result.suggestions),
+		}
+
+		return Result.ok(pcomb_res)
 	end
 )
 
