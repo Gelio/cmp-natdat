@@ -52,7 +52,7 @@ end
 
 function source:get_keyword_pattern()
 	-- NOTE: allow spaces in completed text
-	return string.gsub([[PREFIX\(\k\| \)*]], "PREFIX", prefix)
+	return string.gsub([[PREFIX\(\k\| \|:\)*]], "PREFIX", prefix)
 end
 
 return source
