@@ -242,7 +242,7 @@ function M.sequence(parsers)
 				input = pcomb_res.input
 				table.insert(results, pcomb_res.output)
 			else
-				return Result.err("Could not match a sequence of parsers")
+				return Result.err({ message = "Could not match a sequence of parsers", cause = result.error })
 			end
 		end
 
