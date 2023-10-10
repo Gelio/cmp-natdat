@@ -358,7 +358,7 @@ end
 M.date_time_pcomb = pcomb.map(
 	pcomb.sequence({
 		pcomb.opt(M.date_pcomb),
-		pcomb.multispace1,
+		pcomb.multispace0,
 		pcomb.opt(M.time_pcomb),
 	}),
 	function(results)

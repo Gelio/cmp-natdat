@@ -827,4 +827,62 @@ describe("date_time_pcomb", function()
 			result
 		)
 	end)
+
+	it("matches 'Oct'", function()
+		local text = "Oct"
+		local result = parsers.date_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 4,
+				},
+				output = {
+					value = {
+						matched_date = {
+							month = 10,
+							year = nil,
+							day_of_month = nil,
+						},
+						matched_time = nil,
+					},
+					suggestions = { "October" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Oct '", function()
+		local text = "Oct "
+		local result = parsers.date_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 5,
+				},
+				output = {
+					value = {
+						matched_date = {
+							month = 10,
+							year = nil,
+							day_of_month = nil,
+						},
+						matched_time = nil,
+					},
+					suggestions = { "October" },
+				},
+			}),
+			result
+		)
+	end)
 end)
