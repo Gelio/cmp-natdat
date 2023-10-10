@@ -320,4 +320,19 @@ end
 M.multispace0 = M.regexp("%s*")
 M.multispace1 = M.regexp("%s+")
 
+---@param input pcomb.Input
+---@return tluser.Result<pcomb.Result<nil>, string>
+function M.end_of_input(input)
+	if input.offset ~= input.text:len() + 1 then
+		return Result.err("End of input is not matched yet")
+	end
+
+	---@type pcomb.Result<nil>
+	local pcomb_res = {
+		input = input,
+		output = nil,
+	}
+	return Result.ok(pcomb_res)
+end
+
 return M

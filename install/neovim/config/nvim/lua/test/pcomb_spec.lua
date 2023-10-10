@@ -578,3 +578,23 @@ describe("terminated", function()
 		)
 	end)
 end)
+
+describe("end_of_input", function()
+	it("matches end of input", function()
+		local result = pcomb.end_of_input({
+			text = "hello",
+			offset = 6,
+		})
+
+		assert.is_true(result:is_ok())
+	end)
+
+	it("returns an error if end of input is not reached", function()
+		local result = pcomb.end_of_input({
+			text = "hello",
+			offset = 2,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
