@@ -215,24 +215,4 @@ M.parse_time_pcomb = pcomb.map_res(
 	end
 )
 
----@param input_parts string[]
-function M.parse_month(input_parts)
-	local month_part = input_parts[1]
-	local month_suggestions = M.get_suggested_months(month_part)
-	if #month_suggestions == 0 then
-		return {}
-	elseif #month_suggestions == 1 then
-		local day_part = input_parts[2]
-		local parsed_day = tonumber(day_part, 10)
-		if type(parsed_day) == "number" then
-			return {
-				month = month_suggestions[1],
-				day = parsed_day,
-			}
-		end
-	else
-		return month_suggestions
-	end
-end
-
 return M
