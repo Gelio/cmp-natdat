@@ -536,3 +536,45 @@ describe("flat_map", function()
 		assert.is_true(result:is_err())
 	end)
 end)
+
+describe("preceded", function()
+	it("returns the result of the second parser", function()
+		local text = " some word"
+		local result = pcomb.preceded(pcomb.tag(" "), pcomb.tag("some"))({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 6,
+				},
+				output = "some",
+			}),
+			result
+		)
+	end)
+end)
+
+describe("terminated", function()
+	it("returns the result of the first parser", function()
+		local text = "some "
+		local result = pcomb.terminated(pcomb.tag("some"), pcomb.tag(" "))({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 6,
+				},
+				output = "some",
+			}),
+			result
+		)
+	end)
+end)

@@ -297,4 +297,24 @@ function M.flat_map(parser, get_next_parser)
 	end
 end
 
+---@generic Output
+---@param first pcomb.Parser<unknown>
+---@param second pcomb.Parser<Output>
+---@return pcomb.Parser<Output>
+function M.preceded(first, second)
+	return M.map(M.sequence({ first, second }), function(results)
+		return results[2]
+	end)
+end
+
+---@generic Output
+---@param first pcomb.Parser<Output>
+---@param second pcomb.Parser<unknown>
+---@return pcomb.Parser<Output>
+function M.terminated(first, second)
+	return M.map(M.sequence({ first, second }), function(results)
+		return results[1]
+	end)
+end
+
 return M
