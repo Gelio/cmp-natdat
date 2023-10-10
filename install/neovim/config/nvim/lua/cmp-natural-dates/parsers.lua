@@ -170,6 +170,41 @@ M.minutes_pcomb = pcomb.map_res(pcomb.integer, function(integer)
 	return Result.ok(match)
 end)
 
+M.am_pm_pcomb = pcomb.map(
+	pcomb.flat_map(
+		pcomb.peek(pcomb.alt({
+			pcomb.tag("a"),
+			pcomb.tag("p"),
+		})),
+		function(letter)
+			assert(letter == "a" or letter == "p", "Unexpected letter " .. letter .. ". It should be 'a' or 'p'")
+
+			-- TODO: try this without the entier peek+flat_map magic. This should be enough
+			return pcomb.sequence({
+				pcomb.tag(letter),
+				pcomb.opt(pcomb.tag("m")),
+			})
+		end
+	),
+	---@param letters string[]
+	---@return natdat.Match<"am" | "a" | "pm" | "p">
+	function(letters)
+		local matched_text = letters[1]
+		if not pcomb.is_NIL(letters[2]) then
+			matched_text = matched_text .. letters[2]
+		end
+
+		---@type natdat.Match<"am" | "a" | "pm" | "p">
+		local match = {
+			value = matched_text,
+			suggestions = {
+				letters[1] == "a" and "am" or "pm",
+			},
+		}
+		return match
+	end
+)
+
 -- integer
 -- (:integer) (optional)
 -- optional whitespace
@@ -209,6 +244,7 @@ M.parse_time_pcomb = pcomb.map_res(
 		local hour_match = sequence_match[1]
 		---@type natdat.Match<integer>
 		local minutes_match = sequence_match[2]
+		---@type natdat.Match<"am" | "pm">
 		local am_pm_match = sequence_match[4]
 
 		if not pcomb.is_NIL(am_pm_match) then

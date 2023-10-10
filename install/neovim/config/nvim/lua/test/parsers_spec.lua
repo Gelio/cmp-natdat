@@ -265,6 +265,52 @@ describe("minute_pcomb", function()
 	end)
 end)
 
+describe("am_pm_pcomb", function()
+	it("parses 'am'", function()
+		local text = "am"
+		local result = parsers.am_pm_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = "am",
+					suggestions = { "am" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("parses 'p'", function()
+		local text = "p"
+		local result = parsers.am_pm_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = "p",
+					suggestions = { "pm" },
+				},
+			}),
+			result
+		)
+	end)
+end)
+
 describe("parse_time_pcomb", function()
 	it("parses '14:00'", function()
 		local text = "14:00"
