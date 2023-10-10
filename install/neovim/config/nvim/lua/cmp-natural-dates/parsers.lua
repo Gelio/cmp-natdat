@@ -260,6 +260,10 @@ local function to_am_hour(hour)
 	end
 end
 
+---@class natdat.MatchedTime
+---@field hour integer
+---@field minutes integer
+
 M.time_pcomb = pcomb.map_res(
 	pcomb.sequence({
 		M.hour_pcomb,
@@ -299,7 +303,7 @@ M.time_pcomb = pcomb.map_res(
 
 			local hour_converter = am_pm_match.value:sub(1, 1) == "a" and to_am_hour or to_pm_hour
 
-			---@type natdat.Match<{ hour: integer; minutes: integer; }>
+			---@type natdat.Match<natdat.MatchedTime>
 			local match = {
 				value = {
 					hour = hour_converter(hour_match.value),
@@ -310,7 +314,7 @@ M.time_pcomb = pcomb.map_res(
 			return Result.ok(match)
 		end
 
-		---@type natdat.Match<{ hour: integer; minutes: integer; }>
+		---@type natdat.Match<natdat.MatchedTime>
 		local match = {
 			value = {
 				hour = hour_match.value,
@@ -319,6 +323,66 @@ M.time_pcomb = pcomb.map_res(
 			suggestions = { hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] },
 		}
 		return Result.ok(match)
+	end
+)
+
+---@param first_suggestions string[]?
+---@param second_suggestions string[]?
+---@return string[]
+local function concat_suggestions(first_suggestions, second_suggestions)
+	if first_suggestions == nil then
+		if second_suggestions == nil then
+			return {}
+		end
+
+		return second_suggestions
+	elseif second_suggestions == nil then
+		return first_suggestions
+	end
+
+	---@type string[]
+	local concatenated_suggestions = {}
+	for _, first in ipairs(first_suggestions) do
+		for _, second in ipairs(second_suggestions) do
+			table.insert(concatenated_suggestions, first .. " " .. second)
+		end
+	end
+
+	return concatenated_suggestions
+end
+
+---@class natdat.MatchedDateTime
+---@field matched_date natdat.MatchedDate?
+---@field matched_time natdat.MatchedTime?
+
+M.date_time_pcomb = pcomb.map(
+	pcomb.sequence({
+		pcomb.opt(M.date_pcomb),
+		pcomb.multispace1,
+		pcomb.opt(M.time_pcomb),
+	}),
+	function(results)
+		---@type natdat.Match<natdat.MatchedDate> | pcomb.NIL
+		local date_result = results[1]
+
+		---@type natdat.Match<natdat.MatchedTime> | pcomb.NIL
+		local time_result = results[3]
+
+		---@type natdat.MatchedDateTime
+		local matched_date_time = {
+			matched_date = pcomb.is_NIL(date_result) and nil or date_result.value,
+			matched_time = pcomb.is_NIL(time_result) and nil or time_result.value,
+		}
+
+		---@type natdat.Match<natdat.MatchedDateTime>
+		local match = {
+			value = matched_date_time,
+			suggestions = concat_suggestions(
+				pcomb.is_NIL(date_result) and nil or date_result.suggestions,
+				pcomb.is_NIL(time_result) and nil or time_result.suggestions
+			),
+		}
+		return match
 	end
 )
 

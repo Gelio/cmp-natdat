@@ -736,4 +736,95 @@ describe("time_pcomb", function()
 			result
 		)
 	end)
+
+	it("parses 'Oct 10 4p' starting from '4p'", function()
+		local text = "Oct 10 4p"
+		local result = parsers.time_pcomb({
+			text = text,
+			offset = 8,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						hour = 16,
+						minutes = 0,
+					},
+					suggestions = { "4:00pm" },
+				},
+			}),
+			result
+		)
+	end)
+end)
+
+describe("date_time_pcomb", function()
+	it("matches 'Oct 10 4p'", function()
+		local text = "Oct 10 4p"
+		local result = parsers.date_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						matched_date = {
+							month = 10,
+							year = nil,
+							day_of_month = 10,
+						},
+						matched_time = {
+							hour = 16,
+							minutes = 0,
+						},
+					},
+					suggestions = { "October 10 4:00pm" },
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Oct 10 2023 14:00'", function()
+		local text = "Oct 10 2023 14:00"
+		local result = parsers.date_time_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					value = {
+						matched_date = {
+							month = 10,
+							year = 2023,
+							day_of_month = 10,
+						},
+						matched_time = {
+							hour = 14,
+							minutes = 0,
+						},
+					},
+					suggestions = { "October 10 2023 14:00" },
+				},
+			}),
+			result
+		)
+	end)
 end)
