@@ -1,0 +1,35 @@
+local Result = require("cmp-natural-dates.tluser")
+
+describe("constructors and basic predicates", function()
+	it("constructs an Ok", function()
+		local value = Result.ok("yup")
+		assert.is_true(value:is_ok())
+	end)
+	it("constructs an Error", function()
+		local value = Result.err("yup")
+		assert.is_true(value:is_err())
+	end)
+end)
+
+describe("run", function()
+	it("extracts Ok values and resumes the inner function", function()
+		local result = Result.run(function()
+			local inner_ok = Result.ok("yes")
+			local inner_value = inner_ok:get_ok()
+			assert.are.equals("yes", inner_value)
+			return inner_value
+		end)
+
+		assert.are.same(Result.ok("yes"), result)
+	end)
+
+	it("returns the inner Err value", function()
+		local result = Result.run(function()
+			local inner_ok = Result.err("some error here")
+			inner_ok:get_ok()
+			error("this should never run")
+		end)
+
+		assert.are.same(Result.err("some error here"), result)
+	end)
+end)
