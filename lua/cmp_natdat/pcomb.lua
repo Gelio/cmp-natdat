@@ -1,5 +1,5 @@
 local M = {}
-local Result = require("cmp_natdat.tluser")
+local Result = require("tluser")
 
 ---@class pcomb.Input
 ---@field text string

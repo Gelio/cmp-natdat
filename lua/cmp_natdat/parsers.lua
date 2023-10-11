@@ -53,7 +53,7 @@ function M.get_suggested_months(input)
 end
 
 local pcomb = require("cmp_natdat.pcomb")
-local Result = require("cmp_natdat.tluser")
+local Result = require("tluser")
 
 ---@class natdat.Match<T>: { value: T, suggestions: string[] }
 local Match = {}
@@ -318,7 +318,9 @@ M.time_pcomb = pcomb.map_res(
 					hour = hour_converter(hour_match.value),
 					minutes = minutes_match.value,
 				},
-				suggestions = { hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] .. am_pm_match.suggestions[1] },
+				suggestions = {
+					hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] .. am_pm_match.suggestions[1],
+				},
 			}
 			return Result.ok(match)
 		end

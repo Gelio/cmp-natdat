@@ -109,7 +109,7 @@ describe("get_suggested_months", function()
 	end)
 end)
 
-local Result = require("cmp_natdat.tluser")
+local Result = require("tluser")
 
 describe("month_pcomb", function()
 	it("matches 'January'", function()

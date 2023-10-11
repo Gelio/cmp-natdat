@@ -1,5 +1,5 @@
 local pcomb = require("cmp_natdat.pcomb")
-local Result = require("cmp_natdat.tluser")
+local Result = require("tluser")
 
 describe("tag", function()
 	it("parses a literal and moves the input along", function()
