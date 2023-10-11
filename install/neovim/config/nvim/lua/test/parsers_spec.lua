@@ -1150,3 +1150,24 @@ describe("relative_day_pcomb", function()
 		)
 	end)
 end)
+
+describe("now_pcomb", function()
+	it("matches 'no '", function()
+		local text = "no "
+		local result = parsers.now_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = "now",
+			}),
+			result
+		)
+	end)
+end)
