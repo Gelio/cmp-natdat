@@ -173,7 +173,7 @@ M.digit1 = M.regexp("%d+")
 ---@generic InnerOutput
 ---@generic MapperOutput
 ---@param parser pcomb.Parser<InnerOutput>
----@param mapper function(innerOutput: InnerOutput): tluser.Result<MapperOutput, any>
+---@param mapper fun(innerOutput: InnerOutput): tluser.Result<MapperOutput, any>
 ---@return pcomb.Parser<MapperOutput>
 function M.map_res(parser, mapper)
 	return function(input)
@@ -215,7 +215,7 @@ M.integer = M.map_res(
 ---@generic InnerOutput
 ---@generic MapperOutput
 ---@param parser pcomb.Parser<InnerOutput>
----@param mapper function(innerOutput: InnerOutput): MapperOutput
+---@param mapper fun(innerOutput: InnerOutput): MapperOutput
 ---@return pcomb.Parser<MapperOutput>
 function M.map(parser, mapper)
 	return M.map_res(parser, function(value)
@@ -292,7 +292,7 @@ end
 ---@generic InnerOutput
 ---@generic OuterOutput
 ---@param parser pcomb.Parser<InnerOutput>
----@param get_next_parser function(inner_output: InnerOutput): pcomb.Parser<OuterOutput>
+---@param get_next_parser fun(inner_output: InnerOutput): pcomb.Parser<OuterOutput>
 ---@return pcomb.Parser<OuterOutput>
 function M.flat_map(parser, get_next_parser)
 	---@param input pcomb.Input
