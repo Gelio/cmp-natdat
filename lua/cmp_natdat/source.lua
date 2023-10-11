@@ -5,7 +5,7 @@ function source.new()
 end
 
 function source:get_debug_name()
-	return "natural-dates"
+	return "natdat"
 end
 
 local prefix = "@"
