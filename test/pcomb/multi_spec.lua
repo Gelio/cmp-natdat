@@ -1,9 +1,10 @@
-local pcomb = require("pcomb")
+local pcharacter = require("pcomb.character")
+local pmulti = require("pcomb.multi")
 local Result = require("tluser")
 
 describe("many0", function()
 	it("aggregates as many matches as possible", function()
-		local parser = pcomb.many0(pcomb.tag("hey"))
+		local parser = pmulti.many0(pcharacter.tag("hey"))
 		local text = "heyheyyouyou"
 		local result = parser({
 			text = text,
@@ -23,7 +24,7 @@ describe("many0", function()
 	end)
 
 	it("returns an empty array when no matches were found", function()
-		local parser = pcomb.many0(pcomb.tag("hey"))
+		local parser = pmulti.many0(pcharacter.tag("hey"))
 		local text = "are you hey or no?"
 		local result = parser({
 			text = text,
@@ -45,7 +46,7 @@ end)
 
 describe("many1", function()
 	it("aggregates as many matches as possible", function()
-		local parser = pcomb.many1(pcomb.tag("hey"))
+		local parser = pmulti.many1(pcharacter.tag("hey"))
 		local text = "heyheyyouyou"
 		local result = parser({
 			text = text,
@@ -65,7 +66,7 @@ describe("many1", function()
 	end)
 
 	it("returns an error when no matches were found", function()
-		local parser = pcomb.many1(pcomb.tag("hey"))
+		local parser = pmulti.many1(pcharacter.tag("hey"))
 		local text = "are you hey or no?"
 		local result = parser({
 			text = text,

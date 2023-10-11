@@ -1,12 +1,13 @@
-local pcomb = require("pcomb")
+local pcharacter = require("pcomb.character")
+local pbranch = require("pcomb.branch")
 local Result = require("tluser")
 
 describe("alt", function()
 	it("returns the result of the first parser when it matched", function()
-		local word = pcomb.regexp("%a+")
-		local parser = pcomb.alt({
+		local word = pcharacter.regexp("%a+")
+		local parser = pbranch.alt({
 			word,
-			pcomb.number,
+			pcharacter.integer,
 		})
 		local text = "hello world"
 		local result = parser({
@@ -27,10 +28,10 @@ describe("alt", function()
 	end)
 
 	it("returns the result of the second parser when the first did not match", function()
-		local word = pcomb.regexp("%a+")
-		local parser = pcomb.alt({
+		local word = pcharacter.regexp("%a+")
+		local parser = pbranch.alt({
 			word,
-			pcomb.integer,
+			pcharacter.integer,
 		})
 		local text = "12345 world"
 		local result = parser({
@@ -51,10 +52,10 @@ describe("alt", function()
 	end)
 
 	it("returns an error when no parsers matched input", function()
-		local word = pcomb.regexp("%a+")
-		local parser = pcomb.alt({
+		local word = pcharacter.regexp("%a+")
+		local parser = pbranch.alt({
 			word,
-			pcomb.integer,
+			pcharacter.integer,
 		})
 		local text = "[1234]"
 		local result = parser({

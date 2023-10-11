@@ -52,8 +52,13 @@ function M.get_suggested_months(input)
 	end, month_indices)
 end
 
-local pcomb = require("pcomb")
 local Result = require("tluser")
+
+local pbranch = require("pcomb.branch")
+local pcharacter = require("pcomb.character")
+local pcombinator = require("pcomb.combinator")
+local psequence = require("pcomb.sequence")
+local pnil = require("pcomb.nil")
 
 ---@class natdat.Match<T>: { value: T, suggestions: string[] }
 local Match = {}
@@ -73,8 +78,8 @@ end
 ---@field word string
 ---@field matched_month natdat.SuggestedMonth | nil
 
-M.month_pcomb = pcomb.map_res(
-	pcomb.alpha1,
+M.month_pcomb = pcombinator.map_res(
+	pcharacter.alpha1,
 	---@param word string
 	function(word)
 		local matching_months = M.get_suggested_months(word)
@@ -97,7 +102,7 @@ M.month_pcomb = pcomb.map_res(
 	end
 )
 
-M.day_of_month_pcomb = pcomb.map(pcomb.integer, function(day_of_month)
+M.day_of_month_pcomb = pcombinator.map(pcharacter.integer, function(day_of_month)
 	-- NOTE: checking if day_of_month is a valid month day happens in a consuming
 	-- parser
 
@@ -109,7 +114,7 @@ M.day_of_month_pcomb = pcomb.map(pcomb.integer, function(day_of_month)
 	return match
 end)
 
-M.year_pcomb = pcomb.map(pcomb.integer, function(year)
+M.year_pcomb = pcombinator.map(pcharacter.integer, function(year)
 	---@type natdat.Match<integer>
 	local match = {
 		value = year,
@@ -123,29 +128,31 @@ end)
 ---@field month integer?
 ---@field year integer?
 
-M.date_pcomb = pcomb.map_res(
-	pcomb.sequence({
+M.date_pcomb = pcombinator.map_res(
+	psequence.sequence({
 		M.month_pcomb,
-		pcomb.opt(pcomb.sequence({
-			pcomb.preceded(pcomb.multispace0, M.day_of_month_pcomb),
-			pcomb.opt(pcomb.preceded(
-				pcomb.multispace1,
-				pcomb.terminated(
-					M.year_pcomb,
+		pcombinator.opt(psequence.sequence({
+			psequence.preceded(pcharacter.multispace0, M.day_of_month_pcomb),
+			pcombinator.opt(
+				psequence.preceded(
+					pcharacter.multispace1,
+					psequence.terminated(
+						M.year_pcomb,
 
-					pcomb.peek(pcomb.alt({
-						pcomb.end_of_input,
-						pcomb.multispace1,
-					}))
+						pcombinator.peek(pbranch.alt({
+							pcombinator.end_of_input,
+							pcharacter.multispace1,
+						}))
+					)
 				)
-			)),
+			),
 		})),
 	}),
 	function(results)
 		---@type natdat.Match<natdat.MatchedMonth>
 		local month_result = results[1]
 
-		if pcomb.is_NIL(results[2]) then
+		if pnil.is_NIL(results[2]) then
 			---@type natdat.Match<natdat.MatchedDate?>
 			local pcomb_res = {
 				value = month_result.value.matched_month and {
@@ -166,7 +173,7 @@ M.date_pcomb = pcomb.map_res(
 
 		---@type natdat.Match<integer> | pcomb.NIL
 		local year_result = results[2][2]
-		if pcomb.is_NIL(year_result) then
+		if pnil.is_NIL(year_result) then
 			---@type natdat.Match<natdat.MatchedDate>
 			local pcomb_res = {
 				value = {
@@ -200,7 +207,7 @@ M.date_pcomb = pcomb.map_res(
 	end
 )
 
-M.hour_pcomb = pcomb.map_res(pcomb.integer, function(integer)
+M.hour_pcomb = pcombinator.map_res(pcharacter.integer, function(integer)
 	if integer >= 24 then
 		return Result.err("Hour " .. integer .. " is too large")
 	end
@@ -213,7 +220,7 @@ M.hour_pcomb = pcomb.map_res(pcomb.integer, function(integer)
 	return Result.ok(match)
 end)
 
-M.minutes_pcomb = pcomb.map_res(pcomb.integer, function(integer)
+M.minutes_pcomb = pcombinator.map_res(pcharacter.integer, function(integer)
 	if integer >= 59 then
 		return Result.err("Minutes " .. integer .. " is too large")
 	end
@@ -226,16 +233,16 @@ M.minutes_pcomb = pcomb.map_res(pcomb.integer, function(integer)
 	return Result.ok(match)
 end)
 
-M.am_pm_pcomb = pcomb.map(
-	pcomb.sequence({
-		pcomb.alt({ pcomb.tag("a"), pcomb.tag("p") }),
-		pcomb.opt(pcomb.tag("m")),
+M.am_pm_pcomb = pcombinator.map(
+	psequence.sequence({
+		pbranch.alt({ pcharacter.tag("a"), pcharacter.tag("p") }),
+		pcombinator.opt(pcharacter.tag("m")),
 	}),
 	---@param letters string[]
 	---@return natdat.Match<"am" | "a" | "pm" | "p">
 	function(letters)
 		local matched_text = letters[1]
-		if not pcomb.is_NIL(letters[2]) then
+		if not pnil.is_NIL(letters[2]) then
 			matched_text = matched_text .. letters[2]
 		end
 
@@ -274,13 +281,13 @@ end
 ---@field hour integer
 ---@field minutes integer
 
-M.time_pcomb = pcomb.map_res(
-	pcomb.sequence({
+M.time_pcomb = pcombinator.map_res(
+	psequence.sequence({
 		M.hour_pcomb,
-		pcomb.opt_with_default(
-			pcomb.map(
-				pcomb.sequence({
-					pcomb.tag(":"),
+		pcombinator.opt_with_default(
+			pcombinator.map(
+				psequence.sequence({
+					pcharacter.tag(":"),
 					M.minutes_pcomb,
 				}),
 				function(sequence_match)
@@ -295,7 +302,7 @@ M.time_pcomb = pcomb.map_res(
 				suggestions = { "00" },
 			}
 		),
-		pcomb.opt(pcomb.preceded(pcomb.multispace0, M.am_pm_pcomb)),
+		pcombinator.opt(psequence.preceded(pcharacter.multispace0, M.am_pm_pcomb)),
 	}),
 	function(sequence_match)
 		---@type natdat.Match<integer>
@@ -305,7 +312,7 @@ M.time_pcomb = pcomb.map_res(
 		---@type natdat.Match<"am" | "pm"> | pcomb.NIL
 		local am_pm_match = sequence_match[3]
 
-		if not pcomb.is_NIL(am_pm_match) then
+		if not pnil.is_NIL(am_pm_match) then
 			if hour_match.value > 12 then
 				return Result.err("Hour must be less than or equal 12 when using am/pm")
 			end
@@ -366,11 +373,11 @@ end
 ---@field matched_date natdat.MatchedDate?
 ---@field matched_time natdat.MatchedTime?
 
-M.date_time_pcomb = pcomb.map(
-	pcomb.sequence({
-		pcomb.opt(M.date_pcomb),
-		pcomb.multispace0,
-		pcomb.opt(M.time_pcomb),
+M.date_time_pcomb = pcombinator.map(
+	psequence.sequence({
+		pcombinator.opt(M.date_pcomb),
+		pcharacter.multispace0,
+		pcombinator.opt(M.time_pcomb),
 	}),
 	function(results)
 		---@type natdat.Match<natdat.MatchedDate> | pcomb.NIL
@@ -381,16 +388,16 @@ M.date_time_pcomb = pcomb.map(
 
 		---@type natdat.MatchedDateTime
 		local matched_date_time = {
-			matched_date = pcomb.is_NIL(date_result) and nil or date_result.value,
-			matched_time = pcomb.is_NIL(time_result) and nil or time_result.value,
+			matched_date = pnil.is_NIL(date_result) and nil or date_result.value,
+			matched_time = pnil.is_NIL(time_result) and nil or time_result.value,
 		}
 
 		---@type natdat.Match<natdat.MatchedDateTime>
 		local match = {
 			value = matched_date_time,
 			suggestions = concat_suggestions(
-				pcomb.is_NIL(date_result) and nil or date_result.suggestions,
-				pcomb.is_NIL(time_result) and nil or time_result.suggestions
+				pnil.is_NIL(date_result) and nil or date_result.suggestions,
+				pnil.is_NIL(time_result) and nil or time_result.suggestions
 			),
 		}
 		return match
@@ -400,7 +407,7 @@ M.date_time_pcomb = pcomb.map(
 ---@param words string[]
 ---@return pcomb.Parser<integer[]>
 local function prefix_indices_pcomb(words)
-	return pcomb.map_res(pcomb.alpha1, function(word)
+	return pcombinator.map_res(pcharacter.alpha1, function(word)
 		local word_indices = get_prefix_indices_case_insensitive(words, word)
 
 		if #word_indices == 0 then
@@ -426,7 +433,7 @@ M.day_of_week_pcomb = prefix_indices_pcomb(days_of_week)
 ---@param words string[]
 ---@return pcomb.Parser<string[]>
 local function prefixes_pcomb(words)
-	return pcomb.map(prefix_indices_pcomb(words), function(indices)
+	return pcombinator.map(prefix_indices_pcomb(words), function(indices)
 		return vim.tbl_map(function(index)
 			return words[index]
 		end, indices)
@@ -464,9 +471,9 @@ end
 ---@field day_of_week integer Index of `days_of_week`
 ---@field modifier "next" | "last" | nil
 
-M.day_of_week_with_opt_modifier_pcomb = pcomb.map(
-	pcomb.sequence({
-		pcomb.opt(pcomb.terminated(M.day_of_week_modifier_pcomb, pcomb.multispace1)),
+M.day_of_week_with_opt_modifier_pcomb = pcombinator.map(
+	psequence.sequence({
+		pcombinator.opt(psequence.terminated(M.day_of_week_modifier_pcomb, pcharacter.multispace1)),
 		M.day_of_week_pcomb,
 	}),
 	---@return natdat.MatchedDayOfWeek
@@ -475,7 +482,7 @@ M.day_of_week_with_opt_modifier_pcomb = pcomb.map(
 		local modifiers_or_NIL = results[1]
 
 		---@type (string | pcomb.NIL)[]
-		local modifiers = pcomb.is_NIL(modifiers_or_NIL) and { pcomb.NIL } or modifiers_or_NIL
+		local modifiers = pnil.is_NIL(modifiers_or_NIL) and { pnil.NIL } or modifiers_or_NIL
 
 		---@type integer[]
 		local days_of_week_indices = results[2]
@@ -483,7 +490,7 @@ M.day_of_week_with_opt_modifier_pcomb = pcomb.map(
 		return cartesian_product(modifiers, days_of_week_indices, function(modifier, day_of_week)
 			---@type natdat.MatchedDayOfWeek
 			local match = {
-				modifier = pcomb.NIL_to_nil(modifier),
+				modifier = pnil.NIL_to_nil(modifier),
 				day_of_week = day_of_week,
 			}
 			return match
@@ -499,7 +506,7 @@ local relative_days = {
 
 M.relative_day_pcomb = prefixes_pcomb(relative_days)
 
-M.now_pcomb = pcomb.map(prefixes_pcomb({ "now" }), function(results)
+M.now_pcomb = pcombinator.map(prefixes_pcomb({ "now" }), function(results)
 	return results[1]
 end)
 

@@ -1,10 +1,10 @@
-local pcomb = require("pcomb")
+local pcharacter = require("pcomb.character")
 local Result = require("tluser")
 
 describe("tag", function()
 	it("parses a literal and moves the input along", function()
 		local text = "hey! you!"
-		local result = pcomb.tag("hey!")({
+		local result = pcharacter.tag("hey!")({
 			text = text,
 			offset = 1,
 		})
@@ -23,7 +23,7 @@ describe("tag", function()
 
 	it("returns an error when the literal cannot be matched", function()
 		local text = "hey! you!"
-		local result = pcomb.tag("you!")({
+		local result = pcharacter.tag("you!")({
 			text = text,
 			offset = 1,
 		})
@@ -35,7 +35,7 @@ end)
 describe("regexp", function()
 	it("matches a pattern at the beginning of the input", function()
 		local text = "hey! hey! you!"
-		local result = pcomb.regexp("%l+! %l")({
+		local result = pcharacter.regexp("%l+! %l")({
 			text = text,
 			offset = 1,
 		})
@@ -54,7 +54,7 @@ describe("regexp", function()
 
 	it("returns an error when there is no match", function()
 		local text = "nope"
-		local result = pcomb.regexp("%l+! %l")({
+		local result = pcharacter.regexp("%l+! %l")({
 			text = text,
 			offset = 1,
 		})
@@ -64,7 +64,7 @@ describe("regexp", function()
 
 	it("returns an error when the match is not at the beginning of the input", function()
 		local text = "nope but hey!"
-		local result = pcomb.regexp("%l+!")({
+		local result = pcharacter.regexp("%l+!")({
 			text = text,
 			offset = 1,
 		})
@@ -76,7 +76,7 @@ end)
 describe("integer", function()
 	it("parses an integer", function()
 		local text = "1234.1234 5678"
-		local result = pcomb.integer({
+		local result = pcharacter.integer({
 			text = text,
 			offset = 1,
 		})
@@ -95,7 +95,7 @@ describe("integer", function()
 
 	it("returns an error when there is no integer", function()
 		local text = "no int :/ 5678"
-		local result = pcomb.integer({
+		local result = pcharacter.integer({
 			text = text,
 			offset = 1,
 		})

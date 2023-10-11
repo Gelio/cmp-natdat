@@ -1,6 +1,6 @@
 local M = {}
 local Result = require("tluser")
-local pcomb_combinator = require("pcomb.combinator")
+local pcombinator = require("pcomb.combinator")
 
 ---Invokes `parsers` one-by-one and collects all results.
 ---
@@ -40,7 +40,7 @@ end
 ---@param second pcomb.Parser<Output>
 ---@return pcomb.Parser<Output>
 function M.preceded(first, second)
-	return pcomb_combinator.map(M.sequence({ first, second }), function(results)
+	return pcombinator.map(M.sequence({ first, second }), function(results)
 		return results[2]
 	end)
 end
@@ -53,7 +53,7 @@ end
 ---@param second pcomb.Parser<unknown>
 ---@return pcomb.Parser<Output>
 function M.terminated(first, second)
-	return pcomb_combinator.map(M.sequence({ first, second }), function(results)
+	return pcombinator.map(M.sequence({ first, second }), function(results)
 		return results[1]
 	end)
 end
