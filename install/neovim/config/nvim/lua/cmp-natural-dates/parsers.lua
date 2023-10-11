@@ -19,25 +19,37 @@ local months = {
 ---@field name string
 ---@field value integer Month number, starting from 1
 
----@param input string
----@return natdat.SuggestedMonth[]
-function M.get_suggested_months(input)
-	local lowercase_input = string.lower(input)
+---@param words string[]
+---@param prefix string
+---@return integer[] `words` indices for which `prefix` is a prefix
+local function get_prefix_indices_case_insensitive(words, prefix)
+	local lowercase_prefix = prefix:lower()
 
-	---@type natdat.SuggestedMonth[]
-	local suggestions = {}
-	for index, month_name in ipairs(months) do
-		if vim.startswith(month_name:lower(), lowercase_input) then
-			---@type natdat.SuggestedMonth
-			local month = {
-				name = month_name,
-				value = index,
-			}
-			table.insert(suggestions, month)
+	---@type integer[]
+	local indices = {}
+
+	for index, word in ipairs(words) do
+		if vim.startswith(word:lower(), lowercase_prefix) then
+			table.insert(indices, index)
 		end
 	end
 
-	return suggestions
+	return indices
+end
+
+---@param input string
+---@return natdat.SuggestedMonth[]
+function M.get_suggested_months(input)
+	local month_indices = get_prefix_indices_case_insensitive(months, input)
+
+	return vim.tbl_map(function(month_index)
+		---@type natdat.SuggestedMonth
+		local month = {
+			name = months[month_index],
+			value = month_index,
+		}
+		return month
+	end, month_indices)
 end
 
 local pcomb = require("cmp-natural-dates.pcomb")
