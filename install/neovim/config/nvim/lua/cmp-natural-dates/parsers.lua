@@ -490,4 +490,12 @@ M.day_of_week_with_opt_modifier_pcomb = pcomb.map(
 	end
 )
 
+local relative_days = {
+	"yesterday",
+	"today",
+	"tomorrow",
+}
+
+M.relative_day_pcomb = prefixes_pcomb(relative_days)
+
 return M

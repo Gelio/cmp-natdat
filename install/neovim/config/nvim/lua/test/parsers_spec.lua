@@ -1110,3 +1110,43 @@ describe("day_of_week_with_opt_modifier_pcomb", function()
 		)
 	end)
 end)
+
+describe("relative_day_pcomb", function()
+	it("matches 'yesterday'", function()
+		local text = "yesterday"
+		local result = parsers.relative_day_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = { "yesterday" },
+			}),
+			result
+		)
+	end)
+
+	it("matches 'to '", function()
+		local text = "to "
+		local result = parsers.relative_day_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = { "today", "tomorrow" },
+			}),
+			result
+		)
+	end)
+end)
