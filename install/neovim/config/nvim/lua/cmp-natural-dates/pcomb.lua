@@ -51,8 +51,21 @@ M.NIL = {
 	"pcomb.NIL",
 }
 
+---@param value unknown
+---@return boolean
 function M.is_NIL(value)
 	return type(value) == "table" and value[1] == "pcomb.NIL"
+end
+
+---@generic T
+---@param value T | pcomb.NIL
+---@return T | nil
+function M.NIL_to_nil(value)
+	if M.is_NIL(value) then
+		return nil
+	else
+		return value
+	end
 end
 
 ---@generic Output
