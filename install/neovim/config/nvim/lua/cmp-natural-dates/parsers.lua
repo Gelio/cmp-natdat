@@ -396,6 +396,20 @@ M.date_time_pcomb = pcomb.map(
 	end
 )
 
+---@param words string[]
+---@return pcomb.Parser<integer[]>
+local function prefix_indices_pcomb(words)
+	return pcomb.map_res(pcomb.alpha1, function(word)
+		local word_indices = get_prefix_indices_case_insensitive(words, word)
+
+		if #word_indices == 0 then
+			return Result.err("No word matched prefix '" .. word .. "'")
+		end
+
+		return Result.ok(word_indices)
+	end)
+end
+
 local days_of_week = {
 	"Monday",
 	"Tuesday",
@@ -406,34 +420,24 @@ local days_of_week = {
 	"Sunday",
 }
 
-M.day_of_week_pcomb = pcomb.map_res(pcomb.alpha1, function(word)
-	local days_of_week_indices = get_prefix_indices_case_insensitive(days_of_week, word)
+M.day_of_week_pcomb = prefix_indices_pcomb(days_of_week)
 
-	if #days_of_week_indices == 0 then
-		return Result.err("No day of week matched '" .. word .. "'")
-	end
-
-	return Result.ok(days_of_week_indices)
-end)
+---@param words string[]
+---@return pcomb.Parser<string[]>
+local function prefixes_pcomb(words)
+	return pcomb.map(prefix_indices_pcomb(words), function(indices)
+		return vim.tbl_map(function(index)
+			return words[index]
+		end, indices)
+	end)
+end
 
 local day_of_week_modifiers = {
 	"next",
 	"last",
 }
 
-M.day_of_week_modifier_pcomb = pcomb.map_res(pcomb.alpha1, function(word)
-	local modifiers_indices = get_prefix_indices_case_insensitive(day_of_week_modifiers, word)
-
-	if #modifiers_indices == 0 then
-		return Result.err(string.format("No day of week modifier matched '%s'", word))
-	end
-
-	local modifier_names = vim.tbl_map(function(index)
-		return day_of_week_modifiers[index]
-	end, modifiers_indices)
-
-	return Result.ok(modifier_names)
-end)
+M.day_of_week_modifier_pcomb = prefixes_pcomb(day_of_week_modifiers)
 
 ---@generic A
 ---@generic B
