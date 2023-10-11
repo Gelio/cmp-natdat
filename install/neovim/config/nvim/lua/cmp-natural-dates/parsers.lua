@@ -57,14 +57,12 @@ function Match.from_string(value)
 	return match
 end
 
-local pcomb_word = pcomb.regexp("%a+")
-
 ---@class natdat.MatchedMonth
 ---@field word string
 ---@field matched_month natdat.SuggestedMonth | nil
 
 M.month_pcomb = pcomb.map_res(
-	pcomb_word,
+	pcomb.alpha1,
 	---@param word string
 	function(word)
 		local matching_months = M.get_suggested_months(word)

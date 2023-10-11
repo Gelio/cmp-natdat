@@ -320,6 +320,8 @@ end
 M.multispace0 = M.regexp("%s*")
 M.multispace1 = M.regexp("%s+")
 
+M.alpha1 = M.regexp("%a+")
+
 ---@param input pcomb.Input
 ---@return tluser.Result<pcomb.Result<nil>, string>
 function M.end_of_input(input)
