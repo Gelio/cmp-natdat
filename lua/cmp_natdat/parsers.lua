@@ -52,7 +52,7 @@ function M.get_suggested_months(input)
 	end, month_indices)
 end
 
-local pcomb = require("cmp_natdat.pcomb")
+local pcomb = require("pcomb")
 local Result = require("tluser")
 
 ---@class natdat.Match<T>: { value: T, suggestions: string[] }

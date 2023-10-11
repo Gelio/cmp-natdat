@@ -1,4 +1,4 @@
-local pcomb = require("cmp_natdat.pcomb")
+local pcomb = require("pcomb")
 local Result = require("tluser")
 
 describe("tag", function()
