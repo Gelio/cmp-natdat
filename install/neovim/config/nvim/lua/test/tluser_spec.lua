@@ -33,3 +33,48 @@ describe("run", function()
 		assert.are.same(Result.err("some error here"), result)
 	end)
 end)
+
+describe("ok_or_nil", function()
+	it("returns the value if successful", function()
+		assert.are.equals("yes", Result.ok("yes"):ok_or_nil())
+	end)
+
+	it("returns nil if error", function()
+		assert.are.equals(nil, Result.err("error"):ok_or_nil())
+	end)
+end)
+
+describe("partition_list", function()
+	it("returns a list of oks and a list of errors", function()
+		local oks, errors = Result.partition_list({
+			Result.ok(1),
+			Result.err("err1"),
+			Result.err("err2"),
+			Result.ok(2),
+		})
+
+		assert.are.same({ 1, 2 }, oks)
+		assert.are.same({ "err1", "err2" }, errors)
+	end)
+end)
+
+describe("map", function()
+	it("modifies the ok value", function()
+		local result = Result.ok(1):map(function(x)
+			return x + 1
+		end)
+
+		assert.are.same(Result.ok(2), result)
+	end)
+
+	it("leaves the error intact", function()
+		local result = Result.err("err")
+
+		assert.are.same(
+			Result.err("err"),
+			result:map(function(x)
+				return x + 1
+			end)
+		)
+	end)
+end)

@@ -65,4 +65,50 @@ function M.run(f)
 	return last_result
 end
 
+---@generic T
+---@param self tluser.Result<T, unknown>
+---@return T?
+function M.ok_or_nil(self)
+	if M.is_ok(self) then
+		return self.value
+	else
+		return nil
+	end
+end
+
+---@generic T
+---@generic E
+---@param results tluser.Result<T, E>[]
+---@return T[], E[]
+function M.partition_list(results)
+	---@type T[]
+	local oks = {}
+	---@type E[]
+	local errors = {}
+
+	for _, result in ipairs(results) do
+		if result:is_ok() then
+			table.insert(oks, result.value)
+		else
+			table.insert(errors, result.error)
+		end
+	end
+
+	return oks, errors
+end
+
+---@generic T
+---@generic U
+---@generic E
+---@param result tluser.Result<T, E>
+---@param f function(t: T): U
+---@return tluser.Result<U, E>
+function M.map(result, f)
+	if result:is_ok() then
+		return M.ok(f(result.value))
+	else
+		return result
+	end
+end
+
 return M
