@@ -295,8 +295,7 @@ M.time_pcomb = pcomb.map_res(
 				suggestions = { "00" },
 			}
 		),
-		pcomb.regexp("%s*"),
-		pcomb.opt(M.am_pm_pcomb),
+		pcomb.opt(pcomb.preceded(pcomb.multispace0, M.am_pm_pcomb)),
 	}),
 	function(sequence_match)
 		---@type natdat.Match<integer>
@@ -304,7 +303,7 @@ M.time_pcomb = pcomb.map_res(
 		---@type natdat.Match<integer>
 		local minutes_match = sequence_match[2]
 		---@type natdat.Match<"am" | "pm"> | pcomb.NIL
-		local am_pm_match = sequence_match[4]
+		local am_pm_match = sequence_match[3]
 
 		if not pcomb.is_NIL(am_pm_match) then
 			if hour_match.value > 12 then
