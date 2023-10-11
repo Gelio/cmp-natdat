@@ -155,6 +155,7 @@ function M.regexp(pattern)
 end
 
 M.digit = M.regexp("%d")
+M.digit1 = M.regexp("%d+")
 
 ---@generic InnerOutput
 ---@generic MapperOutput
@@ -185,10 +186,9 @@ function M.map_res(parser, mapper)
 end
 
 M.integer = M.map_res(
-	-- TODO: try using regexp instead
-	M.many1(M.digit),
-	function(digits)
-		local integer_str = table.concat(digits, "")
+	M.digit1,
+	---@param integer_str string
+	function(integer_str)
 		local integer = tonumber(integer_str)
 		if type(integer) == "nil" then
 			-- NOTE: this is very unlikely, since we only parsed digits
