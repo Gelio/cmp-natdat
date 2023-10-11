@@ -886,3 +886,227 @@ describe("date_time_pcomb", function()
 		)
 	end)
 end)
+
+describe("day_of_week_pcomb", function()
+	it("matches 'Monday'", function()
+		local text = "Monday"
+		local result = parsers.day_of_week_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = { 1 },
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Mon'", function()
+		local text = "Mon"
+		local result = parsers.day_of_week_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = { 1 },
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Mon '", function()
+		local text = "Mon "
+		local result = parsers.day_of_week_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 4,
+				},
+				output = { 1 },
+			}),
+			result
+		)
+	end)
+
+	it("matches 'T '", function()
+		local text = "T "
+		local result = parsers.day_of_week_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 2,
+				},
+				output = { 2, 4 },
+			}),
+			result
+		)
+	end)
+
+	it("matches 'Th'", function()
+		local text = "Th"
+		local result = parsers.day_of_week_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = { 4 },
+			}),
+			result
+		)
+	end)
+
+	it("returns an error when no day of week can be found", function()
+		local text = "someday"
+		local result = parsers.day_of_week_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
+
+describe("day_of_week_modifier_pcomb", function()
+	it("matches 'next'", function()
+		local text = "next"
+		local result = parsers.day_of_week_modifier_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = { "next" },
+			}),
+			result
+		)
+	end)
+
+	it("matches 'la '", function()
+		local text = "la "
+		local result = parsers.day_of_week_modifier_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = { "last" },
+			}),
+			result
+		)
+	end)
+end)
+
+describe("day_of_week_with_opt_modifier_pcomb", function()
+	it("matches 'last thu '", function()
+		local text = "last thu "
+		local result = parsers.day_of_week_with_opt_modifier_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 9,
+				},
+				output = {
+					{
+						modifier = "last",
+						day_of_week = 4,
+					},
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'next t'", function()
+		local text = "next t"
+		local result = parsers.day_of_week_with_opt_modifier_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					{
+						modifier = "next",
+						day_of_week = 2,
+					},
+					{
+						modifier = "next",
+						day_of_week = 4,
+					},
+				},
+			}),
+			result
+		)
+	end)
+	it("matches 'thursday'", function()
+		local text = "thursday"
+		local result = parsers.day_of_week_with_opt_modifier_pcomb({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					{
+						modifier = nil,
+						day_of_week = 4,
+					},
+				},
+			}),
+			result
+		)
+	end)
+end)

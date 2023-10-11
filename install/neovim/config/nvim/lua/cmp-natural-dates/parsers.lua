@@ -396,4 +396,94 @@ M.date_time_pcomb = pcomb.map(
 	end
 )
 
+local days_of_week = {
+	"Monday",
+	"Tuesday",
+	"Wednesday",
+	"Thursday",
+	"Friday",
+	"Saturday",
+	"Sunday",
+}
+
+M.day_of_week_pcomb = pcomb.map_res(pcomb.alpha1, function(word)
+	local days_of_week_indices = get_prefix_indices_case_insensitive(days_of_week, word)
+
+	if #days_of_week_indices == 0 then
+		return Result.err("No day of week matched '" .. word .. "'")
+	end
+
+	return Result.ok(days_of_week_indices)
+end)
+
+local day_of_week_modifiers = {
+	"next",
+	"last",
+}
+
+M.day_of_week_modifier_pcomb = pcomb.map_res(pcomb.alpha1, function(word)
+	local modifiers_indices = get_prefix_indices_case_insensitive(day_of_week_modifiers, word)
+
+	if #modifiers_indices == 0 then
+		return Result.err(string.format("No day of week modifier matched '%s'", word))
+	end
+
+	local modifier_names = vim.tbl_map(function(index)
+		return day_of_week_modifiers[index]
+	end, modifiers_indices)
+
+	return Result.ok(modifier_names)
+end)
+
+---@generic A
+---@generic B
+---@generic Output
+---@param as A[]
+---@param bs B[]
+---@param f function(a: A, b: B): Output
+---@return Output[]
+local function cartesian_product(as, bs, f)
+	---@type Output[]
+	local outputs = {}
+
+	for _, a in ipairs(as) do
+		for _, b in ipairs(bs) do
+			table.insert(outputs, f(a, b))
+		end
+	end
+
+	return outputs
+end
+
+---@class natdat.MatchedDayOfWeek
+---@field day_of_week integer Index of `days_of_week`
+---@field modifier "next" | "last" | nil
+
+M.day_of_week_with_opt_modifier_pcomb = pcomb.map(
+	pcomb.sequence({
+		pcomb.opt(pcomb.terminated(M.day_of_week_modifier_pcomb, pcomb.multispace1)),
+		M.day_of_week_pcomb,
+	}),
+	---@return natdat.MatchedDayOfWeek
+	function(results)
+		---@type string[] | pcomb.NIL
+		local modifiers_or_NIL = results[1]
+
+		---@type (string | pcomb.NIL)[]
+		local modifiers = pcomb.is_NIL(modifiers_or_NIL) and { pcomb.NIL } or modifiers_or_NIL
+
+		---@type integer[]
+		local days_of_week_indices = results[2]
+
+		return cartesian_product(modifiers, days_of_week_indices, function(modifier, day_of_week)
+			---@type natdat.MatchedDayOfWeek
+			local match = {
+				modifier = pcomb.NIL_to_nil(modifier),
+				day_of_week = day_of_week,
+			}
+			return match
+		end)
+	end
+)
+
 return M
