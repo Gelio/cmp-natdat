@@ -52,8 +52,8 @@ function M.get_suggested_months(input)
 	end, month_indices)
 end
 
-local pcomb = require("cmp-natural-dates.pcomb")
-local Result = require("cmp-natural-dates.tluser")
+local pcomb = require("cmp_natdat.pcomb")
+local Result = require("cmp_natdat.tluser")
 
 ---@class natdat.Match<T>: { value: T, suggestions: string[] }
 local Match = {}

@@ -10,7 +10,7 @@ end
 
 local prefix = "@"
 
-local natdat = require("cmp-natural-dates.parsers")
+local natdat = require("cmp_natdat.parsers")
 
 ---@param params cmp.SourceCompletionApiParams
 ---@param callback fun(response: lsp.CompletionResponse|nil)

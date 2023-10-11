@@ -1,4 +1,4 @@
-local parsers = require("cmp-natural-dates.parsers")
+local parsers = require("cmp_natdat.parsers")
 
 describe("get_suggested_months", function()
 	it("returns all months for an empty input", function()
@@ -109,7 +109,7 @@ describe("get_suggested_months", function()
 	end)
 end)
 
-local Result = require("cmp-natural-dates.tluser")
+local Result = require("cmp_natdat.tluser")
 
 describe("month_pcomb", function()
 	it("matches 'January'", function()

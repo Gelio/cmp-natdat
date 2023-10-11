@@ -1,5 +1,5 @@
-local pcomb = require("cmp-natural-dates.pcomb")
-local Result = require("cmp-natural-dates.tluser")
+local pcomb = require("cmp_natdat.pcomb")
+local Result = require("cmp_natdat.tluser")
 
 describe("tag", function()
 	it("parses a literal and moves the input along", function()

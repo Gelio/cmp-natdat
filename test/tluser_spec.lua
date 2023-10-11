@@ -1,4 +1,4 @@
-local Result = require("cmp-natural-dates.tluser")
+local Result = require("cmp_natdat.tluser")
 
 describe("constructors and basic predicates", function()
 	it("constructs an Ok", function()

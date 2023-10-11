@@ -1,5 +1,5 @@
 local M = {}
-local Result = require("cmp-natural-dates.tluser")
+local Result = require("cmp_natdat.tluser")
 
 ---@class pcomb.Input
 ---@field text string
