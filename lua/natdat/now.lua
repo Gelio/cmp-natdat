@@ -4,13 +4,16 @@ local pcharacter = require("pcomb.character")
 local pcombinator = require("pcomb.combinator")
 
 ---@class natdat.Now
+---@field type "now"
 M.Now = {}
 M.Now.__index = M.Now
 
 ---@return natdat.Now
 function M.Now.new()
 	---@type natdat.Now
-	local now = {}
+	local now = {
+		type = "now",
+	}
 	return setmetatable(now, M.Now)
 end
 
