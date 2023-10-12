@@ -24,6 +24,8 @@ M.am_pm = pcombinator.map(
 	end
 )
 
+---@alias natdat.Time natdat.Time24H | natdat.TimeAMPM
+
 ---@class natdat.Time24H
 ---@field type "24h"
 ---@field hour integer Between 0 and 24

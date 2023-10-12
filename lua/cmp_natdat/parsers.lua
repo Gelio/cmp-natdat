@@ -1,10 +1,3 @@
-local M = {}
-
-local pcharacter = require("pcomb.character")
-local pcombinator = require("pcomb.combinator")
-local psequence = require("pcomb.sequence")
-local pnil = require("pcomb.nil")
-
 ---@param first_suggestions string[]?
 ---@param second_suggestions string[]?
 ---@return string[]
@@ -30,41 +23,6 @@ local function concat_suggestions(first_suggestions, second_suggestions)
 	return concatenated_suggestions
 end
 
----@class natdat.MatchedDateTime
----@field matched_date natdat.MatchedDate?
----@field matched_time natdat.MatchedTime?
-
-M.date_time_pcomb = pcombinator.map(
-	psequence.sequence({
-		pcombinator.opt(M.date_pcomb),
-		pcharacter.multispace0,
-		pcombinator.opt(M.time_pcomb),
-	}),
-	function(results)
-		---@type natdat.Match<natdat.MatchedDate> | pcomb.NIL
-		local date_result = results[1]
-
-		---@type natdat.Match<natdat.MatchedTime> | pcomb.NIL
-		local time_result = results[3]
-
-		---@type natdat.MatchedDateTime
-		local matched_date_time = {
-			matched_date = pnil.is_NIL(date_result) and nil or date_result.value,
-			matched_time = pnil.is_NIL(time_result) and nil or time_result.value,
-		}
-
-		---@type natdat.Match<natdat.MatchedDateTime>
-		local match = {
-			value = matched_date_time,
-			suggestions = concat_suggestions(
-				pnil.is_NIL(date_result) and nil or date_result.suggestions,
-				pnil.is_NIL(time_result) and nil or time_result.suggestions
-			),
-		}
-		return match
-	end
-)
-
 ---@generic A
 ---@generic B
 ---@generic Output
@@ -84,5 +42,3 @@ local function cartesian_product(as, bs, f)
 
 	return outputs
 end
-
-return M
