@@ -2,7 +2,7 @@ local M = {}
 
 ---An artificial replacement for `nil` to allow storing `NIL` in tables.
 ---Useful in `pcomb.sequence`
----@alias pcomb.NIL "pcomb.NIL"[]
+---@alias pcomb.NIL { [1]: "pcomb.NIL" }
 
 ---@type pcomb.NIL
 M.NIL = {
