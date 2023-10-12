@@ -1,6 +1,7 @@
 local M = {}
 
 local natdat_date = require("natdat.date")
+local natdat_day_of_week = require("natdat.day_of_week")
 local natdat_time = require("natdat.time")
 
 local pcharacter = require("pcomb.character")
@@ -59,6 +60,34 @@ M.starting_with_month = pcombinator.flat_map(
 					return M.DatelikeAndTime.new(absolute_date, time)
 				end, absolute_dates)
 			end
+		)
+	end
+)
+
+--- DayOfWeek + Time?
+---@type pcomb.Parser<natdat.DayOfWeek[] | natdat.DatelikeAndTime[]>
+M.day_of_week_and_time = pcombinator.map(
+	psequence.sequence({
+		natdat_day_of_week.day_of_week,
+		pcombinator.opt(psequence.preceded(pcharacter.multispace0, natdat_time.time)),
+	}),
+	---@param results { [1]: natdat.DayOfWeek[], [2]: pcomb.NIL | natdat.Time }
+	---@return natdat.DayOfWeek[] | natdat.DatelikeAndTime[]
+	function(results)
+		local days_of_week = results[1]
+		local time = results[2]
+
+		if pnil.is_NIL(time) then
+			return days_of_week
+		end
+
+		return vim.tbl_map(
+			---@param day_of_week natdat.DayOfWeek
+			---@return natdat.DatelikeAndTime
+			function(day_of_week)
+				return M.DatelikeAndTime.new(day_of_week, time)
+			end,
+			days_of_week
 		)
 	end
 )
