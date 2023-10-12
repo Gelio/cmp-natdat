@@ -14,6 +14,32 @@ local natdat = require("natdat")
 local natdat_date = require("natdat.date")
 local natdat_current_date_time = require("natdat.current_date_time")
 
+---@param current_date_time natdat.CurrentDateTime
+---@param item natdat.Item
+---@return lsp.CompletionItem
+local function natdat_item_to_completion_item(current_date_time, item)
+	---@type string?
+	local iso_date_time = nil
+
+	-- NOTE: just `Month`s do not resolve to any ISO date time, because the date is not clear
+	if getmetatable(item) ~= natdat_date.Month then
+		iso_date_time = item:format_iso(current_date_time)
+	end
+
+	local label = prefix .. item:format_original()
+
+	---@type lsp.CompletionItem
+	local completion_item = {
+		label = label,
+		data = iso_date_time,
+		-- NOTE: extra space to keep the results when the user is still typing
+		-- their parts
+		filterText = label .. " ",
+	}
+
+	return completion_item
+end
+
 ---@param params cmp.SourceCompletionApiParams
 ---@param callback fun(response: lsp.CompletionResponse|nil)
 function source:complete(params, callback)
@@ -34,15 +60,7 @@ function source:complete(params, callback)
 	callback({
 		isIncomplete = true,
 		items = vim.tbl_map(function(item)
-			---@type string?
-			local iso_date_time = nil
-
-			-- NOTE: just `Month`s do not resolve to any ISO date time, because the date is not clear
-			if getmetatable(item) ~= natdat_date.Month then
-				iso_date_time = item:format_iso(current_date_time)
-			end
-
-			return { label = prefix .. item:format_original(), data = iso_date_time }
+			return natdat_item_to_completion_item(current_date_time, item)
 		end, results),
 	})
 end
