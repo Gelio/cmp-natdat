@@ -277,8 +277,4 @@ local relative_days = {
 
 M.relative_day_pcomb = prefixes_pcomb(relative_days)
 
-M.now_pcomb = pcombinator.map(prefixes_pcomb({ "now" }), function(results)
-	return results[1]
-end)
-
 return M
