@@ -112,3 +112,24 @@ describe("terminated", function()
 		)
 	end)
 end)
+
+describe("delimited", function()
+	it("returns the result of the second parser", function()
+		local text = " some "
+		local result = psequence.delimited(pcharacter.tag(" "), pcharacter.tag("some"), pcharacter.tag(" "))({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = "some",
+			}),
+			result
+		)
+	end)
+end)

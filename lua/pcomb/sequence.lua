@@ -58,4 +58,16 @@ function M.terminated(first, second)
 	end)
 end
 
+---Invokes the `first`, `second`, and `third` parsers, but only keeps the
+---result of the `second` parser.
+---
+---@generic Output
+---@param first pcomb.Parser<unknown>
+---@param second pcomb.Parser<Output>
+---@param third pcomb.Parser<Output>
+---@return pcomb.Parser<Output>
+function M.delimited(first, second, third)
+	return M.preceded(first, M.terminated(second, third))
+end
+
 return M
