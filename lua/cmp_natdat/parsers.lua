@@ -19,24 +19,6 @@ local months = {
 ---@field name string
 ---@field value integer Month number, starting from 1
 
----@param words string[]
----@param prefix string
----@return integer[] `words` indices for which `prefix` is a prefix
-local function get_prefix_indices_case_insensitive(words, prefix)
-	local lowercase_prefix = prefix:lower()
-
-	---@type integer[]
-	local indices = {}
-
-	for index, word in ipairs(words) do
-		if vim.startswith(word:lower(), lowercase_prefix) then
-			table.insert(indices, index)
-		end
-	end
-
-	return indices
-end
-
 ---@param input string
 ---@return natdat.SuggestedMonth[]
 function M.get_suggested_months(input)
@@ -207,143 +189,6 @@ M.date_pcomb = pcombinator.map_res(
 	end
 )
 
-M.hour_pcomb = pcombinator.map_res(pcharacter.integer, function(integer)
-	if integer >= 24 then
-		return Result.err("Hour " .. integer .. " is too large")
-	end
-
-	---@type natdat.Match<integer>
-	local match = {
-		value = integer,
-		suggestions = { tostring(integer) },
-	}
-	return Result.ok(match)
-end)
-
-M.minutes_pcomb = pcombinator.map_res(pcharacter.integer, function(integer)
-	if integer >= 59 then
-		return Result.err("Minutes " .. integer .. " is too large")
-	end
-
-	---@type natdat.Match<integer>
-	local match = {
-		value = integer,
-		suggestions = { string.format("%02d", integer) },
-	}
-	return Result.ok(match)
-end)
-
-M.am_pm_pcomb = pcombinator.map(
-	psequence.sequence({
-		pbranch.alt({ pcharacter.tag("a"), pcharacter.tag("p") }),
-		pcombinator.opt(pcharacter.tag("m")),
-	}),
-	---@param letters string[]
-	---@return natdat.Match<"am" | "a" | "pm" | "p">
-	function(letters)
-		local matched_text = letters[1]
-		if not pnil.is_NIL(letters[2]) then
-			matched_text = matched_text .. letters[2]
-		end
-
-		---@type natdat.Match<"am" | "a" | "pm" | "p">
-		local match = {
-			value = matched_text,
-			suggestions = {
-				letters[1] == "a" and "am" or "pm",
-			},
-		}
-		return match
-	end
-)
-
----@param hour number
----@return number
-local function to_pm_hour(hour)
-	if hour == 12 then
-		return 12
-	else
-		return hour + 12
-	end
-end
-
----@param hour number
----@return number
-local function to_am_hour(hour)
-	if hour == 12 then
-		return 0
-	else
-		return hour
-	end
-end
-
----@class natdat.MatchedTime
----@field hour integer
----@field minutes integer
-
-M.time_pcomb = pcombinator.map_res(
-	psequence.sequence({
-		M.hour_pcomb,
-		pcombinator.opt_with_default(
-			pcombinator.map(
-				psequence.sequence({
-					pcharacter.tag(":"),
-					M.minutes_pcomb,
-				}),
-				function(sequence_match)
-					---@type natdat.Match<integer>
-					local minutes_match = sequence_match[2]
-					return minutes_match
-				end
-			),
-			---@type natdat.Match<integer>
-			{
-				value = 0,
-				suggestions = { "00" },
-			}
-		),
-		pcombinator.opt(psequence.preceded(pcharacter.multispace0, M.am_pm_pcomb)),
-	}),
-	function(sequence_match)
-		---@type natdat.Match<integer>
-		local hour_match = sequence_match[1]
-		---@type natdat.Match<integer>
-		local minutes_match = sequence_match[2]
-		---@type natdat.Match<"am" | "pm"> | pcomb.NIL
-		local am_pm_match = sequence_match[3]
-
-		if not pnil.is_NIL(am_pm_match) then
-			if hour_match.value > 12 then
-				return Result.err("Hour must be less than or equal 12 when using am/pm")
-			end
-
-			local hour_converter = am_pm_match.value:sub(1, 1) == "a" and to_am_hour or to_pm_hour
-
-			---@type natdat.Match<natdat.MatchedTime>
-			local match = {
-				value = {
-					hour = hour_converter(hour_match.value),
-					minutes = minutes_match.value,
-				},
-				suggestions = {
-					hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] .. am_pm_match.suggestions[1],
-				},
-			}
-			return Result.ok(match)
-		end
-
-		---@type natdat.Match<natdat.MatchedTime>
-		local match = {
-			value = {
-				hour = hour_match.value,
-				minutes = minutes_match.value,
-			},
-			suggestions = { hour_match.suggestions[1] .. ":" .. minutes_match.suggestions[1] },
-		}
-		return Result.ok(match)
-	end
-)
-
 ---@param first_suggestions string[]?
 ---@param second_suggestions string[]?
 ---@return string[]
@@ -404,20 +249,6 @@ M.date_time_pcomb = pcombinator.map(
 	end
 )
 
----@param words string[]
----@return pcomb.Parser<integer[]>
-local function prefix_indices_pcomb(words)
-	return pcombinator.map_res(pcharacter.alpha1, function(word)
-		local word_indices = get_prefix_indices_case_insensitive(words, word)
-
-		if #word_indices == 0 then
-			return Result.err("No word matched prefix '" .. word .. "'")
-		end
-
-		return Result.ok(word_indices)
-	end)
-end
-
 local days_of_week = {
 	"Monday",
 	"Tuesday",
@@ -429,16 +260,6 @@ local days_of_week = {
 }
 
 M.day_of_week_pcomb = prefix_indices_pcomb(days_of_week)
-
----@param words string[]
----@return pcomb.Parser<string[]>
-local function prefixes_pcomb(words)
-	return pcombinator.map(prefix_indices_pcomb(words), function(indices)
-		return vim.tbl_map(function(index)
-			return words[index]
-		end, indices)
-	end)
-end
 
 local day_of_week_modifiers = {
 	"next",
