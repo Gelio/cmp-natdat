@@ -249,25 +249,6 @@ M.date_time_pcomb = pcombinator.map(
 	end
 )
 
-local days_of_week = {
-	"Monday",
-	"Tuesday",
-	"Wednesday",
-	"Thursday",
-	"Friday",
-	"Saturday",
-	"Sunday",
-}
-
-M.day_of_week_pcomb = prefix_indices_pcomb(days_of_week)
-
-local day_of_week_modifiers = {
-	"next",
-	"last",
-}
-
-M.day_of_week_modifier_pcomb = prefixes_pcomb(day_of_week_modifiers)
-
 ---@generic A
 ---@generic B
 ---@generic Output
@@ -287,37 +268,6 @@ local function cartesian_product(as, bs, f)
 
 	return outputs
 end
-
----@class natdat.MatchedDayOfWeek
----@field day_of_week integer Index of `days_of_week`
----@field modifier "next" | "last" | nil
-
-M.day_of_week_with_opt_modifier_pcomb = pcombinator.map(
-	psequence.sequence({
-		pcombinator.opt(psequence.terminated(M.day_of_week_modifier_pcomb, pcharacter.multispace1)),
-		M.day_of_week_pcomb,
-	}),
-	---@return natdat.MatchedDayOfWeek
-	function(results)
-		---@type string[] | pcomb.NIL
-		local modifiers_or_NIL = results[1]
-
-		---@type (string | pcomb.NIL)[]
-		local modifiers = pnil.is_NIL(modifiers_or_NIL) and { pnil.NIL } or modifiers_or_NIL
-
-		---@type integer[]
-		local days_of_week_indices = results[2]
-
-		return cartesian_product(modifiers, days_of_week_indices, function(modifier, day_of_week)
-			---@type natdat.MatchedDayOfWeek
-			local match = {
-				modifier = pnil.NIL_to_nil(modifier),
-				day_of_week = day_of_week,
-			}
-			return match
-		end)
-	end
-)
 
 local relative_days = {
 	"yesterday",
