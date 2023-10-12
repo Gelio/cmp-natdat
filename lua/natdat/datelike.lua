@@ -67,7 +67,7 @@ M.starting_with_month = pcombinator.flat_map(
 
 --- DayOfWeek + Time?
 ---@type pcomb.Parser<natdat.DayOfWeek[] | natdat.DatelikeAndTime[]>
-M.day_of_week_and_time = pcombinator.map(
+M.day_of_week_and_opt_time = pcombinator.map(
 	psequence.sequence({
 		natdat_day_of_week.day_of_week,
 		pcombinator.opt(psequence.preceded(pcharacter.multispace0, natdat_time.time)),
@@ -95,7 +95,7 @@ M.day_of_week_and_time = pcombinator.map(
 
 --- RelativeDay + Time?
 ---@type pcomb.Parser<natdat.RelativeDay[] | natdat.DatelikeAndTime[]>
-M.relative_day_and_time = pcombinator.map(
+M.relative_day_and_opt_time = pcombinator.map(
 	psequence.sequence({
 		natdat_relative_day.relative_day,
 		pcombinator.opt(psequence.preceded(pcharacter.multispace0, natdat_time.time)),

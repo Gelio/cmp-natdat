@@ -98,10 +98,10 @@ describe("starting_with_month", function()
 	end)
 end)
 
-describe("day_of_week_and_time", function()
+describe("day_of_week_and_opt_time", function()
 	it("matches 'last mon 2pm'", function()
 		local text = "las mon 2pm"
-		local result = natdat_datelike.day_of_week_and_time({
+		local result = natdat_datelike.day_of_week_and_opt_time({
 			text = text,
 			offset = 1,
 		})
@@ -125,7 +125,7 @@ describe("day_of_week_and_time", function()
 
 	it("matches 'th'", function()
 		local text = "th"
-		local result = natdat_datelike.day_of_week_and_time({
+		local result = natdat_datelike.day_of_week_and_opt_time({
 			text = text,
 			offset = 1,
 		})
@@ -145,10 +145,10 @@ describe("day_of_week_and_time", function()
 	end)
 end)
 
-describe("relative_day_and_time", function()
+describe("relative_day_and_opt_time", function()
 	it("matches 'to 2pm'", function()
 		local text = "to 2pm"
-		local result = natdat_datelike.relative_day_and_time({
+		local result = natdat_datelike.relative_day_and_opt_time({
 			text = text,
 			offset = 1,
 		})
@@ -176,7 +176,7 @@ describe("relative_day_and_time", function()
 
 	it("matches 'toda'", function()
 		local text = "toda"
-		local result = natdat_datelike.relative_day_and_time({
+		local result = natdat_datelike.relative_day_and_opt_time({
 			text = text,
 			offset = 1,
 		})
