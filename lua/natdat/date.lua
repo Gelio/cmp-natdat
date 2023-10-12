@@ -34,6 +34,7 @@ local month_names = {
 	"December",
 }
 
+---@type pcomb.Parser<natdat.Month[]>
 M.month = pcombinator.map(
 	pcombinator.map_res(pcharacter.alpha1, natdat_prefix.prefix_indices(month_names)),
 	---@param month_indices integer[]

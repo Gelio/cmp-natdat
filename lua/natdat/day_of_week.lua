@@ -63,12 +63,10 @@ M.day_of_week = pcombinator.map(
 		pcombinator.opt(psequence.terminated(day_of_week_modifier, pcharacter.multispace1)),
 		raw_day_of_week,
 	}),
+	---@param results { [1]: natdat.DayOfWeekModifier | pcomb.NIL, [2]: integer[] }
 	---@return natdat.DayOfWeek[]
 	function(results)
-		---@type natdat.DayOfWeekModifier | nil
 		local modifier = pnil.NIL_to_nil(results[1])
-
-		---@type integer[]
 		local days_of_week_indices = results[2]
 
 		return vim.tbl_map(function(day_of_week)

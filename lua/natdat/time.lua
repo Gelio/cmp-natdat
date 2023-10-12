@@ -112,21 +112,20 @@ M.time = pcombinator.map_res(
 		pcombinator.opt(psequence.preceded(pcharacter.tag(":"), pcharacter.integer)),
 		pcombinator.opt(psequence.preceded(pcharacter.multispace0, M.am_pm)),
 	}),
+	---@param sequence_matches { [1]: integer, [2]: integer | pcomb.NIL, [3]: natdat.AMPM | pcomb.NIL }
+	---@return tluser.Result<natdat.Time24H | natdat.TimeAMPM>
 	function(sequence_matches)
-		---@type integer
 		local hour = sequence_matches[1]
 		if hour >= 24 then
 			return Result.err("Hour " .. hour .. " is too large. It must be less than 24")
 		end
 
-		---@type integer | pcomb.NIL
 		local minutes = sequence_matches[2]
 
 		if not pnil.is_NIL(minutes) and minutes >= 60 then
 			return Result.err("Minutes " .. minutes .. " is too large. It must be less than 60")
 		end
 
-		---@type natdat.AMPM | pcomb.NIL
 		local am_pm = sequence_matches[3]
 
 		if pnil.is_NIL(am_pm) then
