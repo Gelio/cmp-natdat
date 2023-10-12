@@ -2,6 +2,7 @@ local M = {}
 
 local natdat_date = require("natdat.date")
 local natdat_day_of_week = require("natdat.day_of_week")
+local natdat_relative_day = require("natdat.relative_day")
 local natdat_time = require("natdat.time")
 
 local pcharacter = require("pcomb.character")
@@ -88,6 +89,34 @@ M.day_of_week_and_time = pcombinator.map(
 				return M.DatelikeAndTime.new(day_of_week, time)
 			end,
 			days_of_week
+		)
+	end
+)
+
+--- RelativeDay + Time?
+---@type pcomb.Parser<natdat.RelativeDay[] | natdat.DatelikeAndTime[]>
+M.relative_day_and_time = pcombinator.map(
+	psequence.sequence({
+		natdat_relative_day.relative_day,
+		pcombinator.opt(psequence.preceded(pcharacter.multispace0, natdat_time.time)),
+	}),
+	---@param results { [1]: natdat.RelativeDay[], [2]: pcomb.NIL | natdat.Time }
+	---@return natdat.RelativeDay[] | natdat.DatelikeAndTime[]
+	function(results)
+		local relative_days = results[1]
+		local time = results[2]
+
+		if pnil.is_NIL(time) then
+			return relative_days
+		end
+
+		return vim.tbl_map(
+			---@param relative_day natdat.RelativeDay
+			---@return natdat.DatelikeAndTime
+			function(relative_day)
+				return M.DatelikeAndTime.new(relative_day, time)
+			end,
+			relative_days
 		)
 	end
 )

@@ -3,6 +3,7 @@ local Result = require("tluser")
 local natdat_date = require("natdat.date")
 local natdat_datelike = require("natdat.datelike")
 local natdat_day_of_week = require("natdat.day_of_week")
+local natdat_relative_day = require("natdat.relative_day")
 local natdat_time = require("natdat.time")
 
 describe("starting_with_month", function()
@@ -137,6 +138,57 @@ describe("day_of_week_and_time", function()
 				},
 				output = {
 					natdat_day_of_week.DayOfWeek.new(4, nil),
+				},
+			}),
+			result
+		)
+	end)
+end)
+
+describe("relative_day_and_time", function()
+	it("matches 'to 2pm'", function()
+		local text = "to 2pm"
+		local result = natdat_datelike.relative_day_and_time({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					natdat_datelike.DatelikeAndTime.new(
+						natdat_relative_day.RelativeDay.new("today"),
+						natdat_time.TimeAMPM.new(2, nil, "pm")
+					),
+					natdat_datelike.DatelikeAndTime.new(
+						natdat_relative_day.RelativeDay.new("tomorrow"),
+						natdat_time.TimeAMPM.new(2, nil, "pm")
+					),
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches 'toda'", function()
+		local text = "toda"
+		local result = natdat_datelike.relative_day_and_time({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					natdat_relative_day.RelativeDay.new("today"),
 				},
 			}),
 			result
