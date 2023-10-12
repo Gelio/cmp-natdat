@@ -3,6 +3,7 @@ local M = {}
 local Result = require("tluser")
 
 local natdat_prefix = require("natdat.prefix")
+
 local pbranch = require("pcomb.branch")
 local pcharacter = require("pcomb.character")
 local pcombinator = require("pcomb.combinator")
@@ -39,6 +40,14 @@ local month_names = {
 	"December",
 }
 
+function M.Month:format_original()
+	return month_names[self.index]
+end
+
+function M.Month:format_iso()
+	return string.format("%02d", self.index)
+end
+
 ---@type pcomb.Parser<natdat.Month[]>
 M.month = pcombinator.map(
 	pcombinator.map_res(pcharacter.alpha1, natdat_prefix.prefix_indices(month_names)),
@@ -68,6 +77,50 @@ function M.AbsoluteDate.new(day_of_month, month, year)
 		year = year,
 	}
 	return setmetatable(absolute_date, M.AbsoluteDate)
+end
+
+---@param current_date_time natdat.CurrentDateTime
+function M.AbsoluteDate.from_current_date_time(current_date_time)
+	return M.AbsoluteDate.new(
+		current_date_time.day_of_month,
+		M.Month.new(current_date_time.month),
+		current_date_time.year
+	)
+end
+
+---@param absolute_date natdat.AbsoluteDate
+---@param number_of_days integer
+function M.AbsoluteDate.add_days(absolute_date, number_of_days)
+	local target_osdate = os.date(
+		"*t",
+		os.time({
+			year = absolute_date.year,
+			month = absolute_date.month.index,
+			-- NOTE: rely on the fact that Lua understands that e.g. 32nd of January
+			-- is the 1st of February
+			day = absolute_date.day_of_month + number_of_days,
+		})
+	)
+	return M.AbsoluteDate.new(target_osdate.day, M.Month.new(target_osdate.month), target_osdate.year)
+end
+
+function M.AbsoluteDate:format_original()
+	local formatted_year = ""
+	if self.year ~= nil then
+		formatted_year = " " .. self.year
+	end
+
+	return string.format("%s %d%s", self.month:format_original(), self.day_of_month, formatted_year)
+end
+
+---@param current_date_time natdat.CurrentDateTime
+function M.AbsoluteDate:format_iso(current_date_time)
+	local year = self.year
+	if year == nil then
+		year = current_date_time.year
+	end
+
+	return string.format("%d-%s-%02d", year, self.month:format_iso(), self.day_of_month)
 end
 
 local end_of_input_or_whitespace = pcombinator.peek(pbranch.alt({

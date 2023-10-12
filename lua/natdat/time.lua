@@ -45,12 +45,12 @@ function M.Time24H.new(hour, minutes)
 	return setmetatable(time, M.Time24H)
 end
 
-function M.Time24H:format()
+function M.Time24H:format_iso()
 	return string.format("%d:%02d", self.hour, self.minutes or 0)
 end
 
-function M.Time24H:to_24h_time()
-	return self
+function M.Time24H:format_original()
+	return self:format_iso()
 end
 
 ---@class natdat.TimeAMPM
@@ -75,8 +75,11 @@ function M.TimeAMPM.new(hour, minutes, am_pm)
 	return setmetatable(time, M.TimeAMPM)
 end
 
-function M.TimeAMPM:format()
-	local minutes_part = self.minutes ~= nil and string.format(":%02d", self.minutes) or ""
+function M.TimeAMPM:format_original()
+	local minutes_part = ""
+	if self.minutes ~= nil then
+		minutes_part = string.format(":%02d", self.minutes)
+	end
 
 	return self.hour .. minutes_part .. self.am_pm
 end
@@ -105,6 +108,10 @@ function M.TimeAMPM:to_24h_time()
 	local hour_24h = self.am_pm == "am" and to_am_hour(self.hour) or to_pm_hour(self.hour)
 
 	return M.Time24H.new(hour_24h, self.minutes)
+end
+
+function M.TimeAMPM:format_iso()
+	return self:to_24h_time():format_iso()
 end
 
 ---@type pcomb.Parser<natdat.Time24H | natdat.TimeAMPM>

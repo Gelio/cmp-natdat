@@ -1,5 +1,8 @@
 local M = {}
+
 local natdat_prefix = require("natdat.prefix")
+local natdat_date = require("natdat.date")
+
 local pcharacter = require("pcomb.character")
 local pcombinator = require("pcomb.combinator")
 
@@ -18,6 +21,28 @@ function M.RelativeDay.new(variant)
 		variant = variant,
 	}
 	return setmetatable(relative_day, M.RelativeDay)
+end
+
+function M.RelativeDay:format_original()
+	return self.variant
+end
+
+---@param current_date_time natdat.CurrentDateTime
+function M.RelativeDay:format_iso(current_date_time)
+	local current_absolute_date = natdat_date.AbsoluteDate.from_current_date_time(current_date_time)
+
+	if self.variant == "today" then
+		return current_absolute_date:format_iso(current_date_time)
+	end
+
+	local days_to_add = 0
+	if self.variant == "yesterday" then
+		days_to_add = -1
+	elseif self.variant == "tomorrow" then
+		days_to_add = 1
+	end
+
+	return natdat_date.AbsoluteDate.add_days(current_absolute_date, days_to_add):format_iso(current_date_time)
 end
 
 ---@type natdat.RelativeDayVariant[]

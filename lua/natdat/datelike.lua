@@ -32,6 +32,25 @@ function M.DatelikeAndTime.new(datelike, time)
 	return setmetatable(datelike_and_time, M.DatelikeAndTime)
 end
 
+function M.DatelikeAndTime:format_original()
+	local formatted_time = ""
+	if self.time ~= nil then
+		formatted_time = " " .. self.time:format_original()
+	end
+
+	return self.datelike:format_original() .. formatted_time
+end
+
+---@param current_date_time natdat.CurrentDateTime
+function M.DatelikeAndTime:format_iso(current_date_time)
+	local formatted_time = ""
+	if self.time ~= nil then
+		formatted_time = " " .. self.time:format_iso()
+	end
+
+	return self.datelike:format_iso(current_date_time) .. formatted_time
+end
+
 ---Month -> (AbsoluteDate + Time?)
 ---@type pcomb.Parser<natdat.Month[] | natdat.AbsoluteDate[] | natdat.DatelikeAndTime[]>
 M.starting_with_month = pcombinator.flat_map(
