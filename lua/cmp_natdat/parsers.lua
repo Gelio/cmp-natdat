@@ -1,39 +1,5 @@
 local M = {}
 
-local months = {
-	"January",
-	"February",
-	"March",
-	"April",
-	"May",
-	"June",
-	"July",
-	"August",
-	"September",
-	"October",
-	"November",
-	"December",
-}
-
----@class natdat.SuggestedMonth
----@field name string
----@field value integer Month number, starting from 1
-
----@param input string
----@return natdat.SuggestedMonth[]
-function M.get_suggested_months(input)
-	local month_indices = get_prefix_indices_case_insensitive(months, input)
-
-	return vim.tbl_map(function(month_index)
-		---@type natdat.SuggestedMonth
-		local month = {
-			name = months[month_index],
-			value = month_index,
-		}
-		return month
-	end, month_indices)
-end
-
 local Result = require("tluser")
 
 local pbranch = require("pcomb.branch")
@@ -55,34 +21,6 @@ function Match.from_string(value)
 	}
 	return match
 end
-
----@class natdat.MatchedMonth
----@field word string
----@field matched_month natdat.SuggestedMonth | nil
-
-M.month_pcomb = pcombinator.map_res(
-	pcharacter.alpha1,
-	---@param word string
-	function(word)
-		local matching_months = M.get_suggested_months(word)
-
-		if #matching_months == 0 then
-			return Result.err("No month match " .. word)
-		end
-
-		---@type natdat.Match<natdat.MatchedMonth>
-		local match = {
-			value = {
-				word = word,
-				matched_month = #matching_months == 1 and matching_months[1] or nil,
-			},
-			suggestions = vim.tbl_map(function(suggested_month)
-				return suggested_month.name
-			end, matching_months),
-		}
-		return Result.ok(match)
-	end
-)
 
 M.day_of_month_pcomb = pcombinator.map(pcharacter.integer, function(day_of_month)
 	-- NOTE: checking if day_of_month is a valid month day happens in a consuming
