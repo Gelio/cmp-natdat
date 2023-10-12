@@ -10,13 +10,14 @@ end
 
 local prefix = "@"
 
-local natdat = require("cmp_natdat.parsers")
+local natdat = require("natdat")
+local natdat_date = require("natdat.date")
+local natdat_current_date_time = require("natdat.current_date_time")
 
 ---@param params cmp.SourceCompletionApiParams
 ---@param callback fun(response: lsp.CompletionResponse|nil)
 function source:complete(params, callback)
 	local input = string.sub(params.context.cursor_before_line, params.offset)
-	vim.print({ input })
 
 	if not vim.startswith(input, prefix) then
 		callback({ isIncomplete = true })
@@ -24,44 +25,33 @@ function source:complete(params, callback)
 
 	local input_without_prefix = string.sub(input, string.len(prefix) + 1)
 
-	local result = natdat.date_time_pcomb({
-		text = input_without_prefix,
-		offset = 1,
-	})
-	vim.print({ result = result, text = input_without_prefix })
-	if result:is_ok() then
-		callback({
-			isIncomplete = true,
-			items = vim.tbl_map(function(suggestion)
-				return { label = prefix .. suggestion }
-			end, result.value.output.suggestions),
-		})
-		return
+	local results = natdat.parse(input_without_prefix)
+	if #results == 0 then
+		callback({ isIncomplete = true })
 	end
+	local current_date_time = natdat_current_date_time.get_current_date_time()
 
 	callback({
-		items = {
-			{
-				label = prefix .. "now",
-				-- data = { variant = "fixed", type = "now" },
-				kind = require("cmp.types.lsp").CompletionItemKind.Value,
-			},
-			{
-				label = prefix .. "now or sth",
-				kind = require("cmp.types.lsp").CompletionItemKind.Value,
-			},
-		},
 		isIncomplete = true,
+		items = vim.tbl_map(function(item)
+			---@type string?
+			local iso_date_time = nil
+
+			-- NOTE: just `Month`s do not resolve to any ISO date time, because the date is not clear
+			if getmetatable(item) ~= natdat_date.Month then
+				iso_date_time = item:format_iso(current_date_time)
+			end
+
+			return { label = prefix .. item:format_original(), data = iso_date_time }
+		end, results),
 	})
 end
 
 ---@param completion_item lsp.CompletionItem
 ---@param callback fun(completion_item: lsp.CompletionItem|nil)
 function source:resolve(completion_item, callback)
-	vim.print(completion_item)
 	callback(vim.tbl_extend("force", completion_item, {
-		insertText = os.date("%Y-%m-%d %#H:%M", os.time()),
-		documentation = "yes",
+		insertText = completion_item.data,
 	}))
 end
 
