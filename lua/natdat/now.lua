@@ -2,6 +2,8 @@ local M = {}
 
 local natdat_prefix = require("natdat.prefix")
 local natdat_date = require("natdat.date")
+local natdat_datelike = require("natdat.datelike")
+local natdat_time = require("natdat.time")
 
 local pcharacter = require("pcomb.character")
 local pcombinator = require("pcomb.combinator")
@@ -28,7 +30,12 @@ end
 
 ---@param current_date_time natdat.CurrentDateTime
 function M.Now:format_iso(current_date_time)
-	return natdat_date.AbsoluteDate.from_current_date_time(current_date_time):format_iso(current_date_time)
+	return natdat_datelike.DatelikeAndTime
+		.new(
+			natdat_date.AbsoluteDate.from_current_date_time(current_date_time),
+			natdat_time.Time24H.new(current_date_time.hour, current_date_time.minutes)
+		)
+		:format_iso(current_date_time)
 end
 
 ---@type pcomb.Parser<natdat.Now>
