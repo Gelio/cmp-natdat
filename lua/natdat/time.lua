@@ -146,13 +146,7 @@ M.time = pcombinator.map_res(
 			return Result.err("Hour " .. hour .. " is too large for an AM/PM hour. It must be at most 12")
 		end
 
-		---@type natdat.TimeAMPM
-		local time_am_pm = {
-			type = "am/pm",
-			hour = hour,
-			minutes = pnil.NIL_to_nil(minutes),
-			am_pm = am_pm,
-		}
+		local time_am_pm = M.TimeAMPM.new(hour, pnil.NIL_to_nil(minutes), am_pm)
 		return Result.ok(time_am_pm)
 	end
 )
