@@ -269,12 +269,4 @@ local function cartesian_product(as, bs, f)
 	return outputs
 end
 
-local relative_days = {
-	"yesterday",
-	"today",
-	"tomorrow",
-}
-
-M.relative_day_pcomb = prefixes_pcomb(relative_days)
-
 return M
