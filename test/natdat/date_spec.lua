@@ -77,3 +77,126 @@ describe("month", function()
 		assert.is_true(result:is_err())
 	end)
 end)
+
+describe("absolute_date", function()
+	it("matches '10 2023'", function()
+		local text = "10 2023"
+		local month = natdat_date.Month.new(10)
+		local result = natdat_date.absolute_date({ month })({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					natdat_date.AbsoluteDate.new(10, month, 2023),
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches '10'", function()
+		local text = "10"
+		local month = natdat_date.Month.new(10)
+		local result = natdat_date.absolute_date({ month })({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					natdat_date.AbsoluteDate.new(10, month, nil),
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches '10 14:' without parsing the '14:' as part of year", function()
+		local text = "10 14:"
+		local month = natdat_date.Month.new(10)
+		local result = natdat_date.absolute_date({ month })({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = {
+					natdat_date.AbsoluteDate.new(10, month, nil),
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches '10 14p' without parsing the '14p' as part of year", function()
+		local text = "10 14p"
+		local month = natdat_date.Month.new(10)
+		local result = natdat_date.absolute_date({ month })({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = 3,
+				},
+				output = {
+					natdat_date.AbsoluteDate.new(10, month, nil),
+				},
+			}),
+			result
+		)
+	end)
+
+	it("matches '10'", function()
+		local text = "10"
+		local month = natdat_date.Month.new(10)
+		local result = natdat_date.absolute_date({ month })({
+			text = text,
+			offset = 1,
+		})
+
+		assert.are.same(
+			Result.ok({
+				input = {
+					text = text,
+					offset = text:len() + 1,
+				},
+				output = {
+					natdat_date.AbsoluteDate.new(10, month, nil),
+				},
+			}),
+			result
+		)
+	end)
+
+	it("does not match '14:'", function()
+		local text = "14:"
+		local month = natdat_date.Month.new(10)
+		local result = natdat_date.absolute_date({ month })({
+			text = text,
+			offset = 1,
+		})
+
+		assert.is_true(result:is_err())
+	end)
+end)
