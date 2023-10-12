@@ -1,0 +1,17 @@
+# An STD for neovim API
+# https://kampfkarren.github.io/selene/usage/std.html
+base: lua51
+name: neovim
+globals:
+  vim:
+    any: true
+  it:
+    args:
+      - type: string
+      - type: function
+  describe:
+    args:
+      - type: string
+      - type: function
+  assert:
+    any: true
