@@ -58,3 +58,7 @@ https://github.com/Gelio/cmp-natdat/assets/889383/1d6d388d-2a10-4923-9156-b99764
        --- other sources...
    }
    ```
+
+## Contributing
+
+See [CONTRIBUTING.md](./CONTRIBUTING.md).
