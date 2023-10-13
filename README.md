@@ -59,6 +59,29 @@ https://github.com/Gelio/cmp-natdat/assets/889383/1d6d388d-2a10-4923-9156-b99764
    }
    ```
 
+## WARNING: cool tech inside
+
+Parsing the dates is done using [pcomb](./lua/pcomb/), a Lua parser combinator
+library. Its API is inspired by Rust's [nom](https://github.com/rust-bakery/nom)
+crate.
+
+`pcomb` can also be used in other plugins to parse other text input into a more
+structured format. It is flexible and makes it easy to build parsers from the
+bottom-up:
+
+```lua
+---@type pcomb.Parser<{ [1]: integer, [2]: pcomb.NIL | integer }>
+local day_of_month_and_opt_year = psequence.sequence({
+    -- Day of month
+    pcharacter.integer,
+    pcombinator.opt(psequence.preceded(
+        pcharacter.multispace1,
+        -- Year
+        pcharacter.integer,
+    ))
+})
+```
+
 ## Contributing
 
 See [CONTRIBUTING.md](./CONTRIBUTING.md).
