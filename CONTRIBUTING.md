@@ -36,7 +36,7 @@ the structure of the [lua](./lua) directory.
 The easiest way to run tests is using `make`:
 
 ```sh
-make test
+make test_dev
 ```
 
 While working on a test, you can also run it with the following vim Ex command:
