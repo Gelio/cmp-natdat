@@ -1,3 +1,10 @@
+---A Result type, inspired by Rust's Result
+---@see https://doc.rust-lang.org/std/result/
+---
+---Generics are not well supported by Lua-LS,
+---which is why it is not as expressive as the Rust counterpart.
+---@see https://github.com/LuaLS/lua-language-server/issues/1861
+---
 ---@class tluser.Result<T, E>: { variant: "ok" | "error", value: T?, error: E? }
 local M = {}
 M.__index = M
@@ -31,6 +38,10 @@ function M.is_err(self)
 	return self.variant == "error"
 end
 
+---Yields the current Result to the parent `M.run` context.
+---The function is resumed with the Result's "ok" value.
+---@see M.run
+---
 ---@generic T
 ---@param self tluser.Result<T, unknown>
 ---@return T
@@ -38,7 +49,12 @@ function M.get_ok(self)
 	return coroutine.yield(self)
 end
 
----@param f function
+---Runs the `f` function until it completes.
+---Each time `f` yields a Result, `f` is resumed only when the yielded Result
+---was "ok".
+---@see M.get_ok
+---
+---@param f fun(): unknown
 ---@return tluser.Result<unknown, unknown>
 function M.run(f)
 	local co = coroutine.create(f)
@@ -76,6 +92,8 @@ function M.ok_or_nil(self)
 	end
 end
 
+---Separates successful values and errors into two lists.
+---
 ---@generic T
 ---@generic E
 ---@param results tluser.Result<T, E>[]
