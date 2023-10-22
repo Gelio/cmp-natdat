@@ -59,6 +59,37 @@ https://github.com/Gelio/cmp-natdat/assets/889383/1d6d388d-2a10-4923-9156-b99764
    }
    ```
 
+## Configuration (optional)
+
+`cmp-natdat` accepts the following optional configuration, passed as a table to
+the `setup()` method:
+
+- `cmp_kind_text` - the text to use as the completion item's label in the
+  nvim-cmp completions popup.
+
+  Default: `Text`
+
+- `highlight_group` - the name of an existing highlight group to use for that
+  completion item's label in the nvim-cmp completions popup.
+
+  Default: `CmpItemKindText`
+
+Example:
+
+```lua
+{
+    "Gelio/cmp-natdat",
+    config = function()
+        require("cmp_natdat").setup({
+            cmp_kind_text = "NatDat",
+            highlight_group = "Red",
+        })
+    end,
+}
+```
+
+![cmp-natdat completions in the nvim-cmp popup are labeled "NatDat" in red](https://github.com/Gelio/cmp-natdat/assets/889383/52730df8-e355-4f4e-842f-d4cb283fbb12)
+
 ## WARNING: cool tech inside
 
 Parsing the dates is done using [pcomb](./lua/pcomb/), a Lua parser combinator
