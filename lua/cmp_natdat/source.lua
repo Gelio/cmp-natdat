@@ -1,10 +1,19 @@
-local source = {}
+---@class CmpNatDatSource
+---@field private cmp_completion_extension lsp.internal.CmpCompletionExtension
+local CmpNatDatSource = {}
+CmpNatDatSource.__index = CmpNatDatSource
 
-function source.new()
-	return setmetatable({}, { __index = source })
+---@param cmp_completion_extension lsp.internal.CmpCompletionExtension
+function CmpNatDatSource.new(cmp_completion_extension)
+	---@type CmpNatDatSource
+	local source = {
+		cmp_completion_extension = cmp_completion_extension,
+	}
+
+	return setmetatable(source, CmpNatDatSource)
 end
 
-function source:get_debug_name()
+function CmpNatDatSource:get_debug_name()
 	return "natdat"
 end
 
@@ -42,7 +51,7 @@ end
 
 ---@param params cmp.SourceCompletionApiParams
 ---@param callback fun(response: lsp.CompletionResponse|nil)
-function source:complete(params, callback)
+function CmpNatDatSource:complete(params, callback)
 	local input = string.sub(params.context.cursor_before_line, params.offset)
 
 	if not vim.startswith(input, prefix) then
@@ -60,26 +69,28 @@ function source:complete(params, callback)
 	callback({
 		isIncomplete = true,
 		items = vim.tbl_map(function(item)
-			return natdat_item_to_completion_item(current_date_time, item)
+			local completion_item = natdat_item_to_completion_item(current_date_time, item)
+			completion_item.cmp = self.cmp_completion_extension
+			return completion_item
 		end, results),
 	})
 end
 
 ---@param completion_item lsp.CompletionItem
 ---@param callback fun(completion_item: lsp.CompletionItem|nil)
-function source:resolve(completion_item, callback)
+function CmpNatDatSource:resolve(completion_item, callback)
 	callback(vim.tbl_extend("force", completion_item, {
 		insertText = completion_item.data,
 	}))
 end
 
-function source:get_trigger_characters()
+function CmpNatDatSource:get_trigger_characters()
 	return { prefix }
 end
 
-function source:get_keyword_pattern()
+function CmpNatDatSource:get_keyword_pattern()
 	-- NOTE: allow spaces in completed text
 	return string.gsub([[PREFIX\(\k\| \|:\)*]], "PREFIX", prefix)
 end
 
-return source
+return CmpNatDatSource
