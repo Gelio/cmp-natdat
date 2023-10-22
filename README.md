@@ -90,6 +90,20 @@ Example:
 
 ![cmp-natdat completions in the nvim-cmp popup are labeled "NatDat" in red](https://github.com/Gelio/cmp-natdat/assets/889383/52730df8-e355-4f4e-842f-d4cb283fbb12)
 
+To get the most out of the custom cmp kind text, you can also use
+[lspkind.nvim](https://github.com/onsails/lspkind.nvim) to show the calendar
+icon (📆) for cmp-natdat completions:
+
+```lua
+require("lspkind").init({
+    symbol_map = {
+        NatDat = "📅",
+    },
+})
+```
+
+![cmp-natdat completions use the calendar icon](https://github.com/Gelio/cmp-natdat/assets/889383/9bf4df4c-fdfb-44d7-a60f-2a8370c94935)
+
 ## WARNING: cool tech inside
 
 Parsing the dates is done using [pcomb](./lua/pcomb/), a Lua parser combinator
