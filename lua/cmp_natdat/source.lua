@@ -55,14 +55,14 @@ function CmpNatDatSource:complete(params, callback)
 	local input = string.sub(params.context.cursor_before_line, params.offset)
 
 	if not vim.startswith(input, prefix) then
-		callback({ isIncomplete = true })
+		callback({ isIncomplete = true, items = {} })
 	end
 
 	local input_without_prefix = string.sub(input, string.len(prefix) + 1)
 
 	local results = natdat.parse(input_without_prefix)
 	if #results == 0 then
-		callback({ isIncomplete = true })
+		callback({ isIncomplete = true, items = {} })
 	end
 	local current_date_time = natdat_current_date_time.get_current_date_time()
 
@@ -79,9 +79,20 @@ end
 ---@param completion_item lsp.CompletionItem
 ---@param callback fun(completion_item: lsp.CompletionItem|nil)
 function CmpNatDatSource:resolve(completion_item, callback)
-	callback(vim.tbl_extend("force", completion_item, {
-		insertText = completion_item.data,
-	}))
+	if completion_item.textEdit ~= nil then
+		-- NOTE:: this branch is executed in blink.compat layer, which creates the
+		-- `textEdit` itself
+		-- https://github.com/Saghen/blink.compat/blob/5ca8848c8cc32abdc980e5db4f0eb7bb8fbf84dc/lua/blink/compat/source.lua#L95
+		callback(vim.tbl_deep_extend("force", completion_item, {
+			textEdit = {
+				newText = completion_item.data,
+			},
+		}))
+	else
+		callback(vim.tbl_extend("force", completion_item, {
+			insertText = completion_item.data,
+		}))
+	end
 end
 
 function CmpNatDatSource:get_trigger_characters()
